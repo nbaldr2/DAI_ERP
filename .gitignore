@@ -1,0 +1,24 @@
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files (if any at root level)
+.env
+.env.local
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Node modules (should be in subdirectories but just in case)
+node_modules/
