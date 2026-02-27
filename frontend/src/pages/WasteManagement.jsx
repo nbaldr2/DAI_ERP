@@ -6,20 +6,20 @@ import {
   Plus,
   Search,
   Filter,
-  Calendar,
   TrendingDown,
-  AlertTriangle,
   Package,
-  DollarSign
+  DollarSign,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import apiService from '../services/api';
+import Swal from 'sweetalert2';
 
 const WasteManagement = () => {
   const { t } = useTranslation();
-  const { hasPermission } = useAuth();
+  const { hasPermission, hasRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [wasteRecords, setWasteRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
@@ -162,12 +162,38 @@ const WasteManagement = () => {
     setFilteredRecords(filtered);
   };
 
+  const handleExportWaste = async () => {
+    try {
+      const response = await apiService.export.table('waste_damages', {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `waste_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(t('common.export_success', 'Data exported successfully'));
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error(t('common.export_failed', 'Failed to export data'));
+    }
+  };
+
   const handleAddWaste = async (e) => {
     e.preventDefault();
     try {
       // Validate form
       if (!newWasteRecord.stock_entry_id || !newWasteRecord.waste_weight) {
-        toast.error('Please fill in all required fields');
+        Swal.fire({
+          title: 'Error!',
+          text: 'Please fill in all required fields',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         return;
       }
 
@@ -181,7 +207,12 @@ const WasteManagement = () => {
 
       await apiService.waste.create(wasteData);
       
-      toast.success('Waste record added successfully');
+      Swal.fire({
+        title: 'Success!',
+        text: 'Waste record added successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
       setShowAddModal(false);
       
       // Reset form
@@ -196,20 +227,44 @@ const WasteManagement = () => {
       fetchWasteData();
     } catch (error) {
       console.error('Error adding waste record:', error);
-      toast.error('Failed to add waste record');
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to add waste record',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this waste record?')) {
-      try {
-        await apiService.waste.delete(id);
-        toast.success('Waste record deleted successfully');
-        fetchWasteData();
-      } catch (error) {
-        toast.error('Failed to delete waste record');
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await apiService.waste.delete(id);
+          Swal.fire(
+            'Deleted!',
+            'The waste record has been deleted.',
+            'success'
+          );
+          fetchWasteData();
+        } catch (error) {
+          Swal.fire(
+            'Error!',
+            'Failed to delete waste record',
+            'error'
+          );
+        }
       }
-    }
+    });
   };
 
   const formatDate = (dateString) => {
@@ -250,7 +305,7 @@ const WasteManagement = () => {
     const available = parseFloat(entry.available_qty || 0).toFixed(2);
     const poRef = entry.purchase_id ? `PO #${entry.purchase_id}` : 'PO N/A';
     const unitPrice = entry?.product?.price_per_unit != null ? ` • Unit: Qr ${entry.product.price_per_unit}` : '';
-    return `${poRef} • ${productName} • ${warehouseName} • Available: ${available} kg${unitPrice}`;
+    return `${poRef} • ${productName} • ${warehouseName} • Available: ${available} ${entry?.product?.unit || 'kg'}${unitPrice}`;
   };
 
   if (loading) {
@@ -262,66 +317,77 @@ const WasteManagement = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Waste Management</h1>
-          <p className="text-gray-600 mt-1">Track and manage inventory waste and losses</p>
+          <h1 className="text-2xl font-bold text-text-primary">Waste Management</h1>
+          <p className="text-text-secondary mt-1">Track and manage inventory waste and losses</p>
         </div>
-        {hasPermission('waste:create') && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Record Waste
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {hasRole('ADMIN') && (
+            <button
+              onClick={handleExportWaste}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 text-text-secondary rounded-lg hover:bg-card-hover transition-colors"
+            >
+              <Download className="w-5 h-5 mr-2" />
+              {t('common.export', 'Export')}
+            </button>
+          )}
+          {hasPermission('waste:create') && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Record Waste
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-red-100 rounded-lg">
               <Trash2 className="w-6 h-6 text-red-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Records</p>
-              <p className="text-2xl font-bold text-gray-900">{filteredRecords.length}</p>
+              <p className="text-sm font-medium text-text-secondary">Total Records</p>
+              <p className="text-2xl font-bold text-text-primary">{filteredRecords.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-orange-100 rounded-lg">
               <Package className="w-6 h-6 text-orange-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Quantity</p>
-              <p className="text-2xl font-bold text-gray-900">{getTotalWasteQuantity().toFixed(1)} kg</p>
+              <p className="text-sm font-medium text-text-secondary">Total Quantity</p>
+              <p className="text-2xl font-bold text-text-primary">{getTotalWasteQuantity().toFixed(1)} kg</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-red-100 rounded-lg">
               <DollarSign className="w-6 h-6 text-red-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Cost</p>
-              <p className="text-2xl font-bold text-gray-900">Qr {getTotalWasteCost().toFixed(2)}</p>
+              <p className="text-sm font-medium text-text-secondary">Total Cost</p>
+              <p className="text-2xl font-bold text-text-primary">Qr {getTotalWasteCost().toFixed(2)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <TrendingDown className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg per Record</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-secondary">Avg per Record</p>
+              <p className="text-2xl font-bold text-text-primary">
                 Qr {filteredRecords.length > 0 ? (getTotalWasteCost() / filteredRecords.length).toFixed(2) : '0.00'}
               </p>
             </div>
@@ -330,10 +396,10 @@ const WasteManagement = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="bg-card rounded-lg p-6 shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               placeholder="Search by product or notes..."
@@ -396,57 +462,57 @@ const WasteManagement = () => {
       </div>
 
       {/* Waste Records Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-theme-border">
+            <thead className="bg-background">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Product
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Quantity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Cost
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Purchase Order
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-card divide-y divide-theme-border">
               {filteredRecords.map((record) => (
-                <tr key={record.id} className="hover:bg-gray-50">
+                <tr key={record.id} className="hover:bg-card-hover">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-text-primary">
                         {record.stock_entry?.product?.name_en && record.stock_entry?.product?.name_ar
                           ? `${record.stock_entry.product.name_en} - ${record.stock_entry.product.name_ar}`
                           : record.stock_entry?.product?.name_en || record.stock_entry?.product?.name_ar || 'Unknown Product'}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-text-secondary">
                         Batch: {record.stock_entry?.batch_number || 'N/A'}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {parseFloat(record.waste_weight || record.quantity || 0).toFixed(2)} kg
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
+                    {parseFloat(record.waste_weight || record.quantity || 0).toFixed(2)} {record.stock_entry?.product?.unit || 'kg'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      (record.reason || '').toLowerCase() === 'waste' ? 'bg-gray-100 text-gray-800' :
+                      (record.reason || '').toLowerCase() === 'waste' ? 'bg-card-hover text-text-primary' :
                       (record.reason || '').toLowerCase() === 'damage' ? 'bg-orange-100 text-orange-800' :
                       (record.reason || '').toLowerCase() === 'health_test' ? 'bg-blue-100 text-blue-800' :
                       (record.reason || '').toLowerCase() === 'spoiled' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      'bg-card-hover text-text-primary'
                     }`}>
                       {record.reason || 'Other'}
                     </span>
@@ -459,10 +525,10 @@ const WasteManagement = () => {
                       return <b>Qr {parseFloat(cost || 0).toFixed(2)}</b>;
                     })()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                     {formatDate(record.created_at)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                     {record.stock_entry?.purchase_id ? (
                       <Link
                         to={`/purchases/${record.stock_entry.purchase_id}`}
@@ -492,9 +558,9 @@ const WasteManagement = () => {
 
         {filteredRecords.length === 0 && (
           <div className="text-center py-12">
-            <Trash2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No waste records found</h3>
-            <p className="text-gray-500">
+            <Trash2 className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-text-primary mb-2">No waste records found</h3>
+            <p className="text-text-secondary">
               {searchTerm || filterType !== 'all' || dateRange !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'No waste has been recorded yet.'
@@ -507,12 +573,12 @@ const WasteManagement = () => {
       {/* Add Waste Modal */}
             {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Record Waste / Damage</h3>
+          <div className="bg-card rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-text-primary mb-4">Record Waste / Damage</h3>
             <form onSubmit={handleAddWaste}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Select PO Item (status: RECEIVED) *
                   </label>
                   <select
@@ -528,11 +594,11 @@ const WasteManagement = () => {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-1">Only items received into stock are shown. Waste reduces available quantity and updates the ledger.</p>
+                  <p className="text-xs text-text-secondary mt-1">Only items received into stock are shown. Waste reduces available quantity and updates the ledger.</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Type
                   </label>
                   <select
@@ -549,8 +615,11 @@ const WasteManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Waste Weight (kg) *
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
+                    Waste Weight ({(() => {
+                      const entry = stockEntries.find(se => String(se.id) === String(newWasteRecord.stock_entry_id));
+                      return entry?.product?.unit || 'kg';
+                    })()}) *
                   </label>
                   <input
                     type="number"
@@ -565,10 +634,10 @@ const WasteManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Estimated Cost
                   </label>
-                  <div className="text-sm text-gray-900">
+                  <div className="text-sm text-text-primary">
                     {(() => {
                       const entry = stockEntries.find(se => String(se.id) === String(newWasteRecord.stock_entry_id));
                       const unit = entry?.product?.price_per_unit;
@@ -580,7 +649,7 @@ const WasteManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Notes (Optional)
                   </label>
                   <textarea
@@ -597,7 +666,7 @@ const WasteManagement = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-text-secondary border border-gray-300 rounded-lg hover:bg-card-hover transition-colors"
                 >
                   Cancel
                 </button>

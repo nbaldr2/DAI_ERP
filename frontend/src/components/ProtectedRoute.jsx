@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children, roles = [] }) => {
   // Check role-based access if roles are specified
   if (roles.length > 0 && user && !roles.includes(user.role)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center animate-fade-in">
           <div className="bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <svg
@@ -36,16 +36,16 @@ const ProtectedRoute = ({ children, roles = [] }) => {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-text-primary mb-2">
             Access Denied
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-text-secondary mb-4">
             You don't have permission to access this page.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-secondary">
             Required roles: {roles.join(", ")}
           </p>
-          <p className="text-sm text-gray-500">Your role: {user?.role}</p>
+          <p className="text-sm text-text-secondary">Your role: {user?.role}</p>
         </div>
       </div>
     );

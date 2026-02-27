@@ -167,7 +167,7 @@ const Purchases = () => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'draft':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-card-hover text-text-primary border-theme-border';
       case 'sent':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'confirmed':
@@ -185,7 +185,7 @@ const Purchases = () => {
       case 'cancelled':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-card-hover text-text-primary border-theme-border';
     }
   };
 
@@ -386,10 +386,10 @@ const Purchases = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             {t('purchases.title', 'Purchases')}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-text-secondary mt-1">
             {t('purchases.subtitle', 'Manage purchase orders and suppliers')}
           </p>
         </div>
@@ -416,20 +416,20 @@ const Purchases = () => {
       <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
             <input
               type="text"
               placeholder={t('purchases.search', 'Search purchase orders...')}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               value={searchTerm}
               onChange={handleSearchTermChange}
             />
           </div>
 
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
             <select
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none"
+              className="w-full pl-10 pr-4 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none"
               value={statusFilter}
               onChange={handleStatusFilterChange}
             >
@@ -442,9 +442,9 @@ const Purchases = () => {
           </div>
 
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
             <select
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none"
+              className="w-full pl-10 pr-4 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none"
               value={dateRange}
               onChange={handleDateRangeChange}
             >
@@ -463,10 +463,10 @@ const Purchases = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-medium text-text-secondary">
                 {t('purchases.stats.total', 'Total Purchase Orders')}
               </p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
+              <p className="text-2xl font-bold text-text-primary mt-1">
                 {purchases.length}
               </p>
             </div>
@@ -479,7 +479,7 @@ const Purchases = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-medium text-text-secondary">
                 {t('purchases.stats.pending', 'Pending')}
               </p>
               <p className="text-2xl font-bold text-yellow-600 mt-1">
@@ -495,7 +495,7 @@ const Purchases = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-medium text-text-secondary">
                 {t('purchases.stats.ordered', 'Ordered')}
               </p>
               <p className="text-2xl font-bold text-blue-600 mt-1">
@@ -511,7 +511,7 @@ const Purchases = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-medium text-text-secondary">
                 {t('purchases.stats.completed', 'Completed')}
               </p>
               <p className="text-2xl font-bold text-green-600 mt-1">
@@ -527,56 +527,56 @@ const Purchases = () => {
 
       {/* Purchases List */}
       <Card>
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="p-6 border-b border-theme-border">
+          <h2 className="text-lg font-semibold text-text-primary">
             {t('purchases.list.title', 'Recent Purchase Orders')}
           </h2>
         </div>
 
         {filteredPurchases.length === 0 ? (
           <div className="p-12 text-center">
-            <ShoppingCart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <ShoppingCart className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-text-primary mb-2">
               {t('purchases.empty.title', 'No purchase orders found')}
             </h3>
-            <p className="text-gray-600">
+            <p className="text-text-secondary">
               {t('purchases.empty.description', 'No purchase orders match your current filters.')}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-background">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('purchases.table.po_number', 'PO #')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('purchases.table.supplier', 'Supplier')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('purchases.table.order_date', 'Order Date')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('purchases.table.expected_date', 'Expected Date')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('purchases.table.amount', 'Amount')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('purchases.table.status', 'Status')}
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t('common.actions', 'Actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-theme-border">
                 {filteredPurchases.map((purchase) => (
-                  <tr key={purchase.id} className="hover:bg-gray-50">
+                  <tr key={purchase.id} className="hover:bg-card-hover">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div 
-                        className="text-sm font-medium text-gray-900 hover:text-green-600 cursor-pointer"
+                        className="text-sm font-medium text-text-primary hover:text-green-600 cursor-pointer"
                         onClick={() =>  handleViewPurchase(purchase.id)}
                       >
                         {purchase.po_number || `PO-${purchase.id}`}
@@ -584,24 +584,24 @@ const Purchases = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <Building className="w-4 h-4 text-gray-400 mr-2" />
-                        <div className="text-sm text-gray-900">
+                        <Building className="w-4 h-4 text-text-secondary mr-2" />
+                        <div className="text-sm text-text-primary">
                           {purchase.supplier?.name || 'N/A'}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-text-secondary">
                         {purchase.order_date ? format(new Date(purchase.order_date), 'MMM dd, yyyy') : 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-text-secondary">
                         {purchase.expected_date ? format(new Date(purchase.expected_date), 'MMM dd, yyyy') : 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-text-primary">
                         QAR {parseFloat(purchase.total || 0).toFixed(2)}
                       </div>
                     </td>
@@ -613,17 +613,17 @@ const Purchases = () => {
                         <div className="relative">
                           <button 
                             onClick={() => toggleStatusDropdown(purchase.id)}
-                            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                            className="text-text-secondary hover:text-text-secondary focus:outline-none"
                           >
                             <ChevronDown className="w-4 h-4" />
                           </button>
                           {statusDropdownOpen === purchase.id && (
-                            <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                            <div className="absolute right-0 mt-1 w-48 bg-card rounded-md shadow-lg py-1 z-10 border border-theme-border">
                               {getStatusOptions(purchase.status).map(option => (
                                 <button
                                   key={option.value}
                                   onClick={() => handleStatusChange(purchase.id, option.value)}
-                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  className="block w-full text-left px-4 py-2 text-sm text-text-secondary hover:bg-card-hover"
                                 >
                                   {option.label}
                                 </button>
@@ -685,35 +685,35 @@ const Purchases = () => {
       {receiveModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black bg-opacity-30" onClick={closeReceiveModal} />
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl">
+          <div className="relative bg-card rounded-lg shadow-xl w-full max-w-3xl">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h3 className="text-lg font-semibold">
                 {t('purchases.receive_modal.title', 'Receive Goods')}
                 {selectedPurchaseId ? ` • PO-${selectedPurchaseId}` : ''}
               </h3>
-              <button onClick={closeReceiveModal} className="text-gray-500 hover:text-gray-700">
+              <button onClick={closeReceiveModal} className="text-text-secondary hover:text-text-secondary">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-700 mb-1">{t('stock.date_in', 'Date In')}</label>
-                  <input type="date" value={dateIn} onChange={(e) => setDateIn(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
+                  <label className="block text-sm text-text-secondary mb-1">{t('stock.date_in', 'Date In')}</label>
+                  <input type="date" value={dateIn} onChange={(e) => setDateIn(e.target.value)} className="w-full border border-theme-border rounded-lg px-3 py-2" />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-700 mb-1">{t('stock.default_expiry_date', 'Default Expiry Date')}</label>
-                  <input type="date" value={defaultExpiryDate} onChange={(e) => setDefaultExpiryDate(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2" />
+                  <label className="block text-sm text-text-secondary mb-1">{t('stock.default_expiry_date', 'Default Expiry Date')}</label>
+                  <input type="date" value={defaultExpiryDate} onChange={(e) => setDefaultExpiryDate(e.target.value)} className="w-full border border-theme-border rounded-lg px-3 py-2" />
                 </div>
                 <div className="flex items-end">
-                  <span className="text-sm text-gray-500">{t('purchases.receive_modal.hint', 'Set defaults and adjust per line')}</span>
+                  <span className="text-sm text-text-secondary">{t('purchases.receive_modal.hint', 'Set defaults and adjust per line')}</span>
                 </div>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50">
+                    <tr className="bg-background">
                       <th className="px-3 py-2 text-left">{t('common.product', 'Product')}</th>
                       <th className="px-3 py-2 text-left">{t('common.warehouse', 'Warehouse')}</th>
                       <th className="px-3 py-2 text-right">{t('stock.received_weight', 'Received')}</th>
@@ -731,7 +731,7 @@ const Purchases = () => {
                           <td className="px-3 py-2">{productName}</td>
                           <td className="px-3 py-2">
                             <select
-                              className="border border-gray-200 rounded px-2 py-1"
+                              className="border border-theme-border rounded px-2 py-1"
                               value={r.warehouse_id || ''}
                               onChange={(e) => updateReceiptField(idx, 'warehouse_id', parseInt(e.target.value))}
                             >
@@ -745,7 +745,7 @@ const Purchases = () => {
                             <input
                               type="number"
                               step="0.01"
-                              className="w-28 text-right border border-gray-200 rounded px-2 py-1"
+                              className="w-28 text-right border border-theme-border rounded px-2 py-1"
                               value={r.received_weight}
                               onChange={(e) => updateReceiptField(idx, 'received_weight', e.target.value)}
                             />
@@ -754,7 +754,7 @@ const Purchases = () => {
                             <input
                               type="number"
                               step="0.01"
-                              className="w-28 text-right border border-gray-200 rounded px-2 py-1"
+                              className="w-28 text-right border border-theme-border rounded px-2 py-1"
                               value={r.damaged_weight}
                               onChange={(e) => updateReceiptField(idx, 'damaged_weight', e.target.value)}
                             />
@@ -765,7 +765,7 @@ const Purchases = () => {
                           <td className="px-3 py-2">
                             <input
                               type="date"
-                              className="border border-gray-200 rounded px-2 py-1"
+                              className="border border-theme-border rounded px-2 py-1"
                               value={r.expiry_date || ''}
                               onChange={(e) => updateReceiptField(idx, 'expiry_date', e.target.value)}
                             />

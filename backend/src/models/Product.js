@@ -26,6 +26,10 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING(100),
     allowNull: true
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   unit: {
     type: DataTypes.STRING(20),
     allowNull: false,

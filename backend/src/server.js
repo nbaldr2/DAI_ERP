@@ -57,7 +57,7 @@ if (process.env.NODE_ENV === "development") {
 // Rate limiting for authentication routes
 const authLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 5, // Max 5 login attempts per 5 minutes from a single IP
+  max: 105, // Max 5 login attempts per 5 minutes from a single IP
   message:
     "Too many login attempts from this IP, please try again after 15 minutes.",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
@@ -66,8 +66,8 @@ const authLimiter = rateLimit({
 
 // General rate limiting for other API routes
 const apiLimiter = rateLimit({
-  windowMs: 2 * 60 * 1000, // 2 minutes
-  max: 500, // Max 400 requests per 2 minutes from a single IP
+  windowMs: 1 * 60 * 1000, // 2 minutes
+  max: 1500, // Max 400 requests per 2 minutes from a single IP
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -105,6 +105,12 @@ const exportRoutes = require("./routes/exportRoutes");
 const userRoutes = require("./routes/userRoutes");
 const ledgerRoutes = require("./routes/ledgerRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
+const quotationRoutes = require("./routes/quotationRoutes");
+const deliveryNoteRoutes = require("./routes/deliveryNoteRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const posRoutes = require("./routes/posRoutes");
+const documentRoutes = require("./routes/documentRoutes");
 
 // Mount routes
 app.use("/api/auth", authLimiter, authRoutes);
@@ -124,6 +130,12 @@ app.use("/api/audit-logs", apiLimiter, auditRoutes);
 app.use("/api/export", apiLimiter, exportRoutes);
 app.use("/api/ledger", apiLimiter, ledgerRoutes);
 app.use("/api/settings", apiLimiter, settingsRoutes);
+app.use("/api/quotations", apiLimiter, quotationRoutes);
+app.use("/api/delivery-notes", apiLimiter, deliveryNoteRoutes);
+app.use("/api/notifications", apiLimiter, notificationRoutes);
+app.use("/api/dashboard", apiLimiter, dashboardRoutes);
+app.use("/api/pos", apiLimiter, posRoutes);
+app.use("/api/documents", apiLimiter, documentRoutes);
 
 // 404 handler
 app.use((req, res) => {

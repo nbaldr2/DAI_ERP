@@ -16,14 +16,14 @@ const LoadingSpinner = ({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm animate-fade-in">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-card/90 backdrop-blur-sm animate-fade-in">
         <div className="text-center">
           <div className="relative">
             <Loader2 className={`${sizes[size]} animate-spin text-primary-500 mx-auto`} />
             <div className="absolute inset-0 rounded-full bg-primary-100 animate-pulse opacity-20"></div>
           </div>
           {message && (
-            <p className="mt-4 text-gray-600 font-medium animate-pulse">
+            <p className="mt-4 text-text-secondary font-medium animate-pulse">
               {message}
             </p>
           )}
@@ -40,7 +40,7 @@ const LoadingSpinner = ({
           <div className="absolute inset-0 rounded-full bg-primary-100 animate-pulse opacity-20"></div>
         </div>
         {message && (
-          <p className="mt-2 text-sm text-gray-500 animate-pulse">
+          <p className="mt-2 text-sm text-text-secondary animate-pulse">
             {message}
           </p>
         )}

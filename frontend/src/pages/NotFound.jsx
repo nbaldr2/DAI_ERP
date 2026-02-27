@@ -24,19 +24,19 @@ const NotFound = () => {
             404
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Search className="w-16 h-16 text-gray-400 animate-pulse" />
+            <Search className="w-16 h-16 text-text-secondary animate-pulse" />
           </div>
         </div>
 
         {/* Error Message */}
         <div className="mb-8 animate-slide-in-up">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold text-text-primary mb-4">
             Page Not Found
           </h1>
-          <p className="text-gray-600 text-lg mb-2">
+          <p className="text-text-secondary text-lg mb-2">
             Sorry, we couldn't find the page you're looking for.
           </p>
-          <p className="text-gray-500 text-sm">
+          <p className="text-text-secondary text-sm">
             The page might have been moved, deleted, or you entered the wrong URL.
           </p>
         </div>
@@ -62,7 +62,7 @@ const NotFound = () => {
         </div>
 
         {/* Decorative Elements */}
-        <div className="mt-12 text-xs text-gray-400 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <div className="mt-12 text-xs text-text-secondary animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <p>© 2025 Dai Trading ERP System</p>
         </div>
       </div>

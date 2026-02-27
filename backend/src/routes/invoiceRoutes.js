@@ -20,7 +20,9 @@ router.get('/next-number', authenticateToken, invoiceController.getNextInvoiceNu
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const { invoice_type, status, customer_id, supplier_id, date_from, date_to, page = 1, limit = 50 } = req.query;
-    const where = {};
+    const where = {
+      deleted_at: null
+    };
 
     if (invoice_type) where.invoice_type = invoice_type;
     if (status) where.status = status;
@@ -117,6 +119,13 @@ router.put('/:id', authenticateToken, authorize('ADMIN', 'ACCOUNTANT'), async (r
 });
 
 /**
+ * @route   DELETE /api/invoices/:id
+ * @desc    Delete invoice
+ * @access  Private (Admin, Accountant)
+ */
+router.delete('/:id', authenticateToken, authorize('ADMIN', 'ACCOUNTANT'), invoiceController.deleteInvoice);
+
+/**
  * @route   GET /api/invoices/:id/download
  * @desc    Download invoice as PDF
  * @access  Private
@@ -125,6 +134,13 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
   // Delegate to controller to generate and stream PDF
   return invoiceController.downloadInvoicePdf(req, res);
 });
+
+/**
+ * @route   PATCH /api/invoices/:id/status
+ * @desc    Update invoice status
+ * @access  Private (Admin, Accountant)
+ */
+router.patch('/:id/status', authenticateToken, authorize('ADMIN', 'ACCOUNTANT'), invoiceController.updateInvoiceStatus);
 
 // Note: next-number route already defined at top via controller; remove duplicate implementation
 

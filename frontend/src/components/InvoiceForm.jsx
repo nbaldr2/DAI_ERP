@@ -221,14 +221,14 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-text-primary">
             {t('invoices.create_title', 'Create New Invoice')}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="text-text-secondary hover:text-text-secondary focus:outline-none"
           >
             <X className="w-6 h-6" />
           </button>
@@ -242,7 +242,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.customer', 'Customer')}
                 </label>
                 <select
@@ -265,21 +265,21 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
 
             {selectedCustomer && (
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                <div className="bg-background p-4 rounded-md">
+                  <h4 className="text-sm font-medium text-text-secondary mb-2">
                     {t('invoices.bill_to', 'Bill To')}
                   </h4>
-                  <p className="text-sm text-gray-600">{selectedCustomer.name}</p>
-                  <p className="text-sm text-gray-600">{selectedCustomer.address}</p>
-                  <p className="text-sm text-gray-600">{selectedCustomer.contact}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.name}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.address}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.contact}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                <div className="bg-background p-4 rounded-md">
+                  <h4 className="text-sm font-medium text-text-secondary mb-2">
                     {t('invoices.ship_to', 'Ship To')}
                   </h4>
-                  <p className="text-sm text-gray-600">{selectedCustomer.name}</p>
-                  <p className="text-sm text-gray-600">{selectedCustomer.address}</p>
-                  <p className="text-sm text-gray-600">{selectedCustomer.contact}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.name}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.address}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.contact}</p>
                 </div>
               </div>
             )}
@@ -292,7 +292,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.invoice_number', 'Invoice Number')}
                 </label>
                 <input
@@ -305,7 +305,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.invoice_date', 'Invoice Date')}
                 </label>
                 <input
@@ -318,7 +318,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.due_date', 'Due Date')}
                 </label>
                 <input
@@ -340,7 +340,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                   onChange={handleInputChange}
                   className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-700">
+                <span className="ml-2 text-sm text-text-secondary">
                   {t('invoices.prevent_reminders', 'Prevent sending overdue reminders')}
                 </span>
               </label>
@@ -354,7 +354,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.payment_modes', 'Allowed Payment Modes')}
                 </label>
                 <div className="space-y-2">
@@ -370,7 +370,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                       }}
                       className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{t('payment_modes.bank', 'Bank')}</span>
+                    <span className="ml-2 text-sm text-text-secondary">{t('payment_modes.bank', 'Bank')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -384,7 +384,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                       }}
                       className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{t('payment_modes.cash', 'Cash')}</span>
+                    <span className="ml-2 text-sm text-text-secondary">{t('payment_modes.cash', 'Cash')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -398,12 +398,12 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                       }}
                       className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{t('payment_modes.check', 'Check')}</span>
+                    <span className="ml-2 text-sm text-text-secondary">{t('payment_modes.check', 'Check')}</span>
                   </label>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.currency', 'Currency')}
                 </label>
                 <select
@@ -417,10 +417,10 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">{t('invoices.currency_note', 'Automatically set to QAR')}</p>
+                <p className="text-xs text-text-secondary mt-1">{t('invoices.currency_note', 'Automatically set to QAR')}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.sale_agent', 'Sale Agent')}
                 </label>
                 <input
@@ -434,7 +434,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.discount_type', 'Discount Type')}
                 </label>
                 <div className="flex items-center space-x-4">
@@ -462,7 +462,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.admin_note', 'Admin Note')}
                 </label>
                 <textarea
@@ -485,33 +485,33 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <tr className="bg-background">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('invoices.item', 'Item')}
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('invoices.description', 'Description')}
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('invoices.quantity', 'Quantity')}
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('invoices.rate', 'Rate')}
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('invoices.tax', 'Tax')}
                     </th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('invoices.amount', 'Amount')}
                     </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-center text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t('common.actions', 'Actions')}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {formData.items.map((item, index) => (
-                    <tr key={index} className="border-t border-gray-200">
+                    <tr key={index} className="border-t border-theme-border">
                       <td className="px-4 py-2">
                         <select
                           value={item.product_id}
@@ -574,7 +574,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                         <input
                           type="number"
                           value={item.amount}
-                          className="w-full p-2 bg-gray-50 border border-gray-300 rounded-md"
+                          className="w-full p-2 bg-background border border-gray-300 rounded-md"
                           readOnly
                         />
                       </td>
@@ -613,14 +613,14 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             <div className="flex flex-col items-end">
               <div className="w-full md:w-1/3 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">{t('invoices.subtotal', 'Subtotal')}:</span>
+                  <span className="text-sm text-text-secondary">{t('invoices.subtotal', 'Subtotal')}:</span>
                   <span className="text-sm font-medium">{formData.currency} {calculateSubtotal().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">{t('invoices.discount', 'Discount')}:</span>
+                  <span className="text-sm text-text-secondary">{t('invoices.discount', 'Discount')}:</span>
                   <span className="text-sm font-medium">{formData.currency} {calculateDiscount().toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-gray-200">
+                <div className="flex justify-between pt-2 border-t border-theme-border">
                   <span className="text-base font-medium">{t('invoices.total', 'Total')}:</span>
                   <span className="text-base font-bold">{formData.currency} {calculateTotal().toFixed(2)}</span>
                 </div>
@@ -635,7 +635,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.client_note', 'Client Note')}
                 </label>
                 <textarea
@@ -648,7 +648,7 @@ const InvoiceForm = ({ onClose, onSuccess }) => {
                 ></textarea>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('invoices.terms', 'Terms & Conditions')}
                 </label>
                 <textarea

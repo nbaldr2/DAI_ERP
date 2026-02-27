@@ -75,7 +75,7 @@ const Login = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading...</p>
+          <p className="text-text-secondary font-medium">Loading...</p>
         </div>
       </div>
     );
@@ -86,10 +86,10 @@ const Login = () => {
       {/* Language toggle */}
       <button
         onClick={toggleLanguage}
-        className="fixed top-6 right-6 z-10 p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+        className="fixed top-6 right-6 z-10 p-3 bg-card/80 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
         title={i18n.language === 'en' ? 'عربي' : 'English'}
       >
-        <Globe className="w-5 h-5 text-gray-600 group-hover:text-primary-600 transition-colors" />
+        <Globe className="w-5 h-5 text-text-secondary group-hover:text-primary-600 transition-colors" />
       </button>
 
       <div className="max-w-md w-full space-y-8 animate-fade-in">
@@ -102,24 +102,24 @@ const Login = () => {
               className="w-60 h-60 rounded-2xl animate-float object-contain"
             />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2 animate-slide-in-up">
+          <h2 className="text-3xl font-bold text-text-primary mb-2 animate-slide-in-up">
             {t('auth.loginTitle')}
           </h2>
-          <p className="text-gray-600 animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
+          <p className="text-text-secondary animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
             {t('auth.loginSubtitle')}
           </p>
           <div className="mt-4 animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
             <h3 className="text-lg font-semibold text-primary-700">Dai Trading ERP</h3>
-            <p className="text-sm text-gray-500">Inventory & Sales Management</p>
+            <p className="text-sm text-text-secondary">Inventory & Sales Management</p>
           </div>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white/80 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 animate-slide-in-up" style={{ animationDelay: '0.3s' }}>
+        <div className="bg-card/80 backdrop-blur-sm shadow-2xl rounded-2xl p-8 border border-white/20 animate-slide-in-up" style={{ animationDelay: '0.3s' }}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Username */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-text-secondary mb-2">
                 {t('auth.username')}
               </label>
               <div className="relative">
@@ -137,7 +137,7 @@ const Login = () => {
                     'w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
                     errors.username
                       ? 'border-red-300 focus:border-red-500'
-                      : 'border-gray-200 focus:border-primary-500'
+                      : 'border-theme-border focus:border-primary-500'
                   )}
                   placeholder={t('auth.username')}
                 />
@@ -151,7 +151,7 @@ const Login = () => {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-2">
                 {t('auth.password')}
               </label>
               <div className="relative">
@@ -169,14 +169,14 @@ const Login = () => {
                     'w-full px-4 py-3 pr-12 border-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
                     errors.password
                       ? 'border-red-300 focus:border-red-500'
-                      : 'border-gray-200 focus:border-primary-500'
+                      : 'border-theme-border focus:border-primary-500'
                   )}
                   placeholder={t('auth.password')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-text-secondary hover:text-text-secondary transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -214,8 +214,8 @@ const Login = () => {
         </div>
 
         {/* Quick Login Demo */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
-          <h3 className="text-sm font-semibold text-gray-800 mb-4 text-center">
+        <div className="bg-card/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
+          <h3 className="text-sm font-semibold text-text-primary mb-4 text-center">
             🚀 Quick Demo Login (Password: password123)
           </h3>
           <div className="grid grid-cols-2 gap-2">
@@ -231,7 +231,7 @@ const Login = () => {
                     'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100': user.role === 'WAREHOUSE',
                     'bg-green-50 border-green-200 text-green-700 hover:bg-green-100': user.role === 'SALES',
                     'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100': user.role === 'ACCOUNTANT',
-                    'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100': user.role === 'VIEWER',
+                    'bg-background border-theme-border text-text-secondary hover:bg-card-hover': user.role === 'VIEWER',
                   }
                 )}
                 style={{ animationDelay: `${0.5 + index * 0.1}s` }}
@@ -244,7 +244,7 @@ const Login = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+        <div className="text-center text-sm text-text-secondary animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <p>© 2025 Dai Trading. Professional ERP System</p>
           <p className="mt-1">Built with ❤️ for Qatar</p>
         </div>

@@ -145,7 +145,7 @@ const Dashboard = () => {
         'rgba(255, 205, 86, 0.8)',
         'rgba(153, 102, 255, 0.8)'
       ];
-      
+
       return {
         label: productName,
         data: data.map(point => point.balance),
@@ -200,7 +200,7 @@ const Dashboard = () => {
           color: 'rgba(0, 0, 0, 0.05)'
         },
         ticks: {
-          callback: function(value) {
+          callback: function (value) {
             return value + ' kg';
           }
         }
@@ -220,40 +220,40 @@ const Dashboard = () => {
         hoverable
         onClick={onClick}
       >
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-gray-900 mb-2">{value}</h3>
-          {subtitle && (
-            <p className="text-sm text-gray-500">{subtitle}</p>
-          )}
-          {trend && (
-            <div className="flex items-center mt-2">
-              {trend > 0 ? (
-                <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-              ) : (
-                <ArrowDownRight className="w-4 h-4 text-red-500 mr-1" />
-              )}
-              <span className={clsx(
-                'text-sm font-medium',
-                trend > 0 ? 'text-green-600' : 'text-red-600'
-              )}>
-                {Math.abs(trend)}%
-              </span>
-              <span className="text-sm text-gray-500 ml-1">vs last week</span>
-            </div>
-          )}
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-text-secondary mb-1">{title}</p>
+            <h3 className="text-3xl font-bold text-text-primary mb-2">{value}</h3>
+            {subtitle && (
+              <p className="text-sm text-text-secondary">{subtitle}</p>
+            )}
+            {trend && (
+              <div className="flex items-center mt-2">
+                {trend > 0 ? (
+                  <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
+                ) : (
+                  <ArrowDownRight className="w-4 h-4 text-red-500 mr-1" />
+                )}
+                <span className={clsx(
+                  'text-sm font-medium',
+                  trend > 0 ? 'text-green-600' : 'text-red-600'
+                )}>
+                  {Math.abs(trend)}%
+                </span>
+                <span className="text-sm text-text-secondary ml-1">vs last week</span>
+              </div>
+            )}
+          </div>
+          <div className={clsx(
+            'p-4 rounded-2xl transition-all duration-300 group-hover:scale-110',
+            `bg-${color}-100`
+          )}>
+            <Icon className={clsx('w-8 h-8', `text-${color}-600`)} />
+          </div>
         </div>
-        <div className={clsx(
-          'p-4 rounded-2xl transition-all duration-300 group-hover:scale-110',
-          `bg-${color}-100`
-        )}>
-          <Icon className={clsx('w-8 h-8', `text-${color}-600`)} />
-        </div>
-      </div>
 
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </Card>
     </div>
   );
@@ -277,8 +277,8 @@ const Dashboard = () => {
       {/* Welcome Header */}
       <div className="relative bg-gradient-to-r from-green-500 via-green-600 to-green-700 rounded-3xl p-8 text-white shadow-2xl overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24 animate-float" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-card/10 rounded-full -translate-y-32 translate-x-32 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-card/5 rounded-full translate-y-24 -translate-x-24 animate-float" />
 
         <div className="relative z-10">
           <div className="flex items-center justify-between">
@@ -359,17 +359,17 @@ const Dashboard = () => {
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading stock trends...</p>
+                <p className="text-text-secondary">Loading stock trends...</p>
               </div>
             </div>
           ) : stockTrends && Object.keys(stockTrends).length > 0 ? (
             <Line data={chartData} options={chartOptions} />
           ) : (
-            <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
+            <div className="h-full flex items-center justify-center bg-gradient-to-br from-background to-card-hover rounded-xl">
               <div className="text-center">
-                <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 font-medium">No stock trend data available</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <BarChart3 className="w-16 h-16 text-text-secondary mx-auto mb-4" />
+                <p className="text-text-primary font-medium">No stock trend data available</p>
+                <p className="text-sm text-text-secondary mt-1">
                   Stock movements will be displayed here
                 </p>
               </div>
@@ -384,49 +384,53 @@ const Dashboard = () => {
         <Card
           title="Recent Activity"
           subtitle="Latest system updates"
-          className="stagger-item"
+          className="stagger-item h-[500px] flex flex-col overflow-hidden"
         >
-          <div className="space-y-4">
-            {Array.isArray(recentActivity) && recentActivity.map((activity) => {
-              const Icon = activity.icon;
-              return (
-                <div
-                  key={activity.id}
-                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                >
-                  <div className={clsx(
-                    'p-2 rounded-lg group-hover:scale-110 transition-transform',
-                    `bg-${activity.color}-100`
-                  )}>
-                    <Icon className={clsx('w-4 h-4', `text-${activity.color}-600`)} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-green-600 transition-colors">
-                      {activity.title}
-                    </p>
-                    <p className="text-sm text-gray-600 truncate">
-                      {activity.description}
-                    </p>
-                    <div className="flex items-center mt-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {formatTimeAgo(activity.timestamp)}
-                      <span className="mx-2">•</span>
-                      {activity.user}
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-4 custom-scrollbar pr-2 -mr-2">
+              {Array.isArray(recentActivity) && recentActivity.map((activity) => {
+                const Icon = activity.icon;
+                return (
+                  <div
+                    key={activity.id}
+                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-card-hover transition-colors group"
+                  >
+                    <div className={clsx(
+                      'p-2 rounded-lg group-hover:scale-110 transition-transform',
+                      `bg-${activity.color}-100/50`
+                    )}>
+                      <Icon className={clsx('w-4 h-4', `text-${activity.color}-600`)} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text-primary group-hover:text-green-600 transition-colors">
+                        {activity.title}
+                      </p>
+                      <p className="text-sm text-text-secondary truncate">
+                        {activity.description}
+                      </p>
+                      <div className="flex items-center mt-1 text-xs text-text-secondary">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {formatTimeAgo(activity.timestamp)}
+                        <span className="mx-2">•</span>
+                        {activity.user}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
-          <Button
-            variant="ghost"
-            className="w-full mt-4"
-            onClick={() => navigate('/audit-logs')}
-            title="Open Audit Logs"
-          >
-            View All Activity
-          </Button>
+          <div className="flex-shrink-0 pt-4 mt-auto border-t border-theme-border -mx-6 -mb-6 px-6 pb-6 bg-card-hover rounded-b-xl">
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => navigate('/audit-logs')}
+              title="Open Audit Logs"
+            >
+              View All Activity
+            </Button>
+          </div>
         </Card>
       </div>
 
@@ -435,21 +439,21 @@ const Dashboard = () => {
         <Card
           title="⚠️ Expiry Alerts"
           subtitle={`${nearExpiry.length} items expiring within 7 days`}
-          className="stagger-item border-l-4 border-l-orange-500 bg-gradient-to-r from-orange-50 to-white"
+          className="stagger-item border-l-4 border-l-orange-500 dark:bg-orange-500/5"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {nearExpiry.slice(0, 6).map((item, index) => (
               <div
                 key={item.id || index}
-                className="p-4 bg-white rounded-lg border border-orange-200 hover:shadow-md transition-all duration-200 group stagger-item"
+                className="p-4 bg-card rounded-lg border border-theme-border hover:shadow-md transition-all duration-200 group stagger-item"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 group-hover:text-orange-600 transition-colors">
+                    <h4 className="font-medium text-text-primary group-hover:text-orange-500 transition-colors">
                       {item.product?.name_en}
                     </h4>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-text-secondary">
                       {item.warehouse?.name} • {parseFloat(item.available_qty).toLocaleString()} kg
                     </p>
                   </div>
@@ -459,8 +463,8 @@ const Dashboard = () => {
                       item.days_until_expiry <= 2
                         ? 'bg-red-100 text-red-800'
                         : item.days_until_expiry <= 5
-                        ? 'bg-orange-100 text-orange-800'
-                        : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-yellow-100 text-yellow-800'
                     )}>
                       {item.days_until_expiry}d
                     </span>

@@ -324,10 +324,10 @@ const PurchaseCreate = () => {
             {t('common.back', 'Back')}
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-text-primary">
               {t('purchases.create_title', 'Create Purchase Order')}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-text-secondary mt-1">
               {t('purchases.create_subtitle', 'Create a new purchase order for your suppliers')}
             </p>
           </div>
@@ -339,13 +339,13 @@ const PurchaseCreate = () => {
           {/* Purchase Order Details */}
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">
                 {t('purchases.details', 'Purchase Order Details')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     {t('purchases.supplier', 'Supplier')}
                     <span className="text-red-500">*</span>
                   </label>
@@ -353,7 +353,7 @@ const PurchaseCreate = () => {
                     name="supplier_id"
                     value={formData.supplier_id}
                     onChange={handleInputChange}
-                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.supplier_id ? 'border-red-500' : 'border-gray-200'}`}
+                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.supplier_id ? 'border-red-500' : 'border-theme-border'}`}
                   >
                     <option value="">{t('purchases.select_supplier', 'Select a supplier')}</option>
                     {filteredSuppliers.map(supplier => (
@@ -368,7 +368,7 @@ const PurchaseCreate = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     {t('purchases.po_number', 'PO Number')}
                   </label>
                   <input
@@ -377,14 +377,14 @@ const PurchaseCreate = () => {
                     value={formData.po_number}
                     onChange={handleInputChange}
                     placeholder={t('purchases.po_number_placeholder', 'Auto-generated if left empty')}
-                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full p-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     {t('purchases.order_date', 'Order Date')}
                     <span className="text-red-500">*</span>
                   </label>
@@ -393,7 +393,7 @@ const PurchaseCreate = () => {
                     name="order_date"
                     value={formData.order_date}
                     onChange={handleInputChange}
-                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.order_date ? 'border-red-500' : 'border-gray-200'}`}
+                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.order_date ? 'border-red-500' : 'border-theme-border'}`}
                   />
                   {errors.order_date && (
                     <p className="text-red-500 text-xs mt-1">{errors.order_date}</p>
@@ -401,7 +401,7 @@ const PurchaseCreate = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     {t('purchases.expected_date', 'Expected Delivery Date')}
                   </label>
                   <input
@@ -409,21 +409,21 @@ const PurchaseCreate = () => {
                     name="expected_date"
                     value={formData.expected_date}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full p-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     {t('purchases.warehouse', 'Default Warehouse')}
                   </label>
                   <select
                     name="warehouse_id"
                     value={formData.warehouse_id || ''}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full p-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="">{t('purchases.select_warehouse', 'Select a warehouse')}</option>
                     {warehouses.map(warehouse => (
@@ -435,14 +435,14 @@ const PurchaseCreate = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     {t('purchases.status', 'Status')}
                   </label>
                   <select
                     name="status"
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full p-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="DRAFT">{t('purchases.status_draft', 'Draft')}</option>
                     <option value="SENT">{t('purchases.status_sent', 'Sent')}</option>
@@ -455,7 +455,7 @@ const PurchaseCreate = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   {t('purchases.notes', 'Notes')}
                 </label>
                 <textarea
@@ -463,7 +463,7 @@ const PurchaseCreate = () => {
                   value={formData.notes}
                   onChange={handleInputChange}
                   rows="3"
-                  className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full p-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder={t('purchases.notes_placeholder', 'Add any additional notes or instructions...')}
                 ></textarea>
               </div>
@@ -472,10 +472,10 @@ const PurchaseCreate = () => {
             {/* Items List */}
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('purchases.items', 'Items')}
                 </h2>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-text-secondary">
                   {t('purchases.total_items', 'Total Items')}: {items.length}
                 </div>
               </div>
@@ -487,45 +487,45 @@ const PurchaseCreate = () => {
               )}
               
               {items.length === 0 ? (
-                <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">
+                <div className="text-center py-8 border-2 border-dashed border-theme-border rounded-lg">
+                  <Package className="w-12 h-12 text-text-secondary mx-auto mb-2" />
+                  <p className="text-text-secondary">
                     {t('purchases.no_items', 'No items added to this purchase order yet')}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-text-secondary mt-1">
                     {t('purchases.add_items_instruction', 'Search and add products from the panel on the right')}
                   </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-background">
                       <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                           {t('purchases.table.product', 'Product')}
                         </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                           {t('purchases.table.quantity', 'Quantity')}
                         </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                           {t('purchases.table.unit_price', 'Unit Price')}
                         </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                           {t('purchases.table.warehouse', 'Warehouse')}
                         </th>
-                        <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                           {t('purchases.table.total', 'Total')}
                         </th>
-                        <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-4 py-2 text-center text-xs font-medium text-text-secondary uppercase tracking-wider">
                           {t('common.actions', 'Actions')}
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-card divide-y divide-theme-border">
                       {items.map((item, index) => (
                         <tr key={index}>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-text-primary">
                               {item.product_name}
                             </div>
                           </td>
@@ -536,7 +536,7 @@ const PurchaseCreate = () => {
                               step="1"
                               value={item.qty}
                               onChange={(e) => updateItemQuantity(index, e.target.value)}
-                              className={`w-20 p-1 text-right border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors[`item_${index}_qty`] ? 'border-red-500' : 'border-gray-200'}`}
+                              className={`w-20 p-1 text-right border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors[`item_${index}_qty`] ? 'border-red-500' : 'border-theme-border'}`}
                             />
                             {errors[`item_${index}_qty`] && (
                               <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_qty`]}</p>
@@ -544,14 +544,14 @@ const PurchaseCreate = () => {
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <div className="flex items-center justify-end">
-                              <span className="text-gray-500 mr-1">QAR</span>
+                              <span className="text-text-secondary mr-1">QAR</span>
                               <input
                                 type="number"
                                 min="0"
                                 step="0.01"
                                 value={item.unit_price}
                                 onChange={(e) => updateItemUnitPrice(index, e.target.value)}
-                                className="w-24 p-1 text-right border border-gray-200 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-24 p-1 text-right border border-theme-border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                               />
                             </div>
                           </td>
@@ -559,7 +559,7 @@ const PurchaseCreate = () => {
                             <select
                               value={item.warehouse_id || ''}
                               onChange={(e) => updateItemWarehouse(index, e.target.value)}
-                              className="w-full p-1 border border-gray-200 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className="w-full p-1 border border-theme-border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             >
                               <option value="">{t('purchases.select_warehouse', 'Select...')}</option>
                               {warehouses.map(warehouse => (
@@ -570,7 +570,7 @@ const PurchaseCreate = () => {
                             </select>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-right">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-text-primary">
                               QAR {(parseFloat(item.total_price) || 0).toFixed(2)}
                             </div>
                           </td>
@@ -585,12 +585,12 @@ const PurchaseCreate = () => {
                           </td>
                         </tr>
                       ))}
-                      <tr className="bg-gray-50">
+                      <tr className="bg-background">
                         <td colSpan="4" className="px-4 py-3 text-right font-medium">
                           {t('purchases.table.grand_total', 'Grand Total')}:
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <div className="text-lg font-bold text-gray-900">
+                          <div className="text-lg font-bold text-text-primary">
                             QAR {(parseFloat(calculateTotal()) || 0).toFixed(2)}
                           </div>
                         </td>
@@ -607,20 +607,20 @@ const PurchaseCreate = () => {
           <div className="lg:col-span-1 space-y-6">
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('purchases.add_products', 'Add Products')}
                 </h2>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-text-secondary">
                   {filteredProducts.length} {t('purchases.of', 'of')} {products.length} {t('purchases.products', 'products')}
                 </div>
               </div>
               
               <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                 <input
                   type="text"
                   placeholder={t('purchases.search_products', 'Search products...')}
-                  className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-10 pr-10 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                 />
@@ -628,7 +628,7 @@ const PurchaseCreate = () => {
                   <button
                     type="button"
                     onClick={() => setProductSearch('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-text-secondary focus:outline-none"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -637,7 +637,7 @@ const PurchaseCreate = () => {
               
               {/* Search info */}
               {productSearch && (
-                <div className="flex justify-between items-center text-xs text-gray-500 mb-2">
+                <div className="flex justify-between items-center text-xs text-text-secondary mb-2">
                   <span>
                     {t('purchases.search_results', 'Showing {{count}} results for "{{search}}"', { 
                       count: filteredProducts.length, 
@@ -687,26 +687,26 @@ const PurchaseCreate = () => {
                 </div>
               )}
               
-              <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
+              <div className="max-h-96 overflow-y-auto border border-theme-border rounded-lg">
                 {filteredProducts.length === 0 ? (
-                  <div className="p-8 text-center text-gray-500">
+                  <div className="p-8 text-center text-text-secondary">
                     <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">
+                    <p className="text-text-secondary">
                       {t('purchases.no_products_found', 'No products found')}
                     </p>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-text-secondary mt-1">
                       {t('purchases.try_adjusting_search', 'Try adjusting your search criteria')}
                     </p>
                   </div>
                 ) : (
-                  <ul className="divide-y divide-gray-200">
+                  <ul className="divide-y divide-theme-border">
                     {filteredProducts.map(product => {
                       const isAdded = items.some(item => item.product_id === product.id);
                       return (
-                        <li key={product.id} className={`p-4 transition-colors duration-150 ${isAdded ? 'bg-gray-50 opacity-75' : 'hover:bg-gray-50'}`}>
+                        <li key={product.id} className={`p-4 transition-colors duration-150 ${isAdded ? 'bg-background opacity-75' : 'hover:bg-card-hover'}`}>
                           <div className="flex justify-between items-start">
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900">
+                              <p className="text-sm font-medium text-text-primary">
                                 {product.name_en && product.name_ar 
                                   ? `${product.name_en} - ${product.name_ar}`
                                   : product.name || product.name_en || product.name_ar || t('purchases.unnamed_product', 'Unnamed Product')}
@@ -759,13 +759,13 @@ const PurchaseCreate = () => {
             
             {/* Warehouse Information */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Home className="w-5 h-5" />
                 {t('purchases.warehouse_info', 'Warehouse Information')}
               </h2>
               
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-text-secondary">
                   {t('purchases.warehouse_info_desc', 'Select the destination warehouse where these products will be stored upon delivery.')}
                 </p>
                 
@@ -779,8 +779,8 @@ const PurchaseCreate = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <p className="text-sm text-gray-500">
+                  <div className="p-3 bg-background border border-theme-border rounded-lg">
+                    <p className="text-sm text-text-secondary">
                       {t('purchases.no_warehouse_selected', 'No warehouse selected')}
                     </p>
                   </div>
@@ -790,7 +790,7 @@ const PurchaseCreate = () => {
             
             {/* Actions */}
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">
                 {t('purchases.actions', 'Actions')}
               </h2>
               

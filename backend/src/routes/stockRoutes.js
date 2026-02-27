@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query } = require('express-validator');
 const stockController = require('../controllers/stockController');
+const stockAdjustmentController = require('../controllers/stockAdjustmentController');
+const stockTransferController = require('../controllers/stockTransferController');
 const { authenticateToken, authorize } = require('../middlewares/auth');
+const { cacheMiddleware, incrementVersion } = require('../middlewares/cache');
 
 /**
  * @route   GET /api/stock
@@ -11,6 +14,7 @@ const { authenticateToken, authorize } = require('../middlewares/auth');
  */
 router.get('/',
   authenticateToken,
+  cacheMiddleware('stock', 120), // Cache for 2 mins
   stockController.listStock
 );
 
@@ -21,6 +25,7 @@ router.get('/',
  */
 router.get('/summary',
   authenticateToken,
+  cacheMiddleware('stock', 300), // Cache for 5 mins
   stockController.getStockSummary
 );
 
@@ -35,6 +40,7 @@ router.get('/balance',
     query('product_id').isInt({ min: 1 }).withMessage('product_id is required and must be integer'),
     query('warehouse_id').isInt({ min: 1 }).withMessage('warehouse_id is required and must be integer')
   ],
+  cacheMiddleware('stock', 300), // Cache for 5 mins
   stockController.getBalance
 );
 
@@ -61,6 +67,10 @@ router.post('/',
     body('status').optional().isIn(['PENDING', 'RECEIVED', 'INSPECTED', 'COMPLETED']).withMessage('Invalid status'),
     body('notes').optional().isString()
   ],
+  async (req, res, next) => {
+    await incrementVersion('stock');
+    next();
+  },
   stockController.createStock
 );
 
@@ -74,6 +84,7 @@ router.get('/:id(\\d+)',
   [
     param('id').isInt({ min: 1 }).withMessage('Valid stock entry ID is required')
   ],
+  cacheMiddleware('stock', 120),
   stockController.getStockById
 );
 
@@ -94,6 +105,10 @@ router.put('/:id(\\d+)',
     body('pallets').optional().isInt({ min: 0 }).withMessage('Pallets must be non-negative'),
     body('pallet_weight').optional().isFloat({ min: 0.01 }).withMessage('Pallet weight must be positive')
   ],
+  async (req, res, next) => {
+    await incrementVersion('stock');
+    next();
+  },
   stockController.updateStock
 );
 
@@ -108,6 +123,10 @@ router.delete('/:id(\\d+)',
   [
     param('id').isInt({ min: 1 }).withMessage('Valid stock entry ID is required')
   ],
+  async (req, res, next) => {
+    await incrementVersion('stock');
+    next();
+  },
   stockController.deleteStock
 );
 
@@ -124,7 +143,8 @@ router.post('/:id(\\d+)/waste',
     body('waste_weight').isFloat({ min: 0.01 }).withMessage('waste_weight must be positive'),
     body('notes').optional().isString()
   ],
-  (req, res, next) => {
+  async (req, res, next) => {
+    await incrementVersion('stock');
     // Inject stock_entry_id from route param to body
     req.body.stock_entry_id = parseInt(req.params.id, 10);
     return stockController.createWaste(req, res, next);
@@ -136,7 +156,106 @@ router.post('/:id(\\d+)/waste',
  * @desc    Get stock trends by product over time
  * @access  Private
  */
-router.get('/trends', authenticateToken, stockController.getStockTrends);
+router.get('/trends',
+  authenticateToken,
+  cacheMiddleware('stock', 3600), // Cache for 1 hour
+  stockController.getStockTrends
+);
+
+/**
+ * @route   GET /api/stock/adjustments
+ * @desc    List stock adjustments
+ * @access  Private
+ */
+router.get('/adjustments',
+  authenticateToken,
+  stockAdjustmentController.list
+);
+
+/**
+ * @route   POST /api/stock/adjustments
+ * @desc    Create stock adjustment (draft)
+ * @access  Private (Admin, Warehouse)
+ */
+router.post('/adjustments',
+  authenticateToken,
+  authorize('ADMIN', 'WAREHOUSE'),
+  [
+    body('warehouse_id').isInt({ min: 1 }).withMessage('Valid warehouse_id is required'),
+    body('reason').isString().notEmpty().withMessage('Reason is required'),
+    body('date').optional().isDate(),
+    body('items').isArray({ min: 1 }).withMessage('Items array is required')
+  ],
+  stockAdjustmentController.create
+);
+
+/**
+ * @route   GET /api/stock/adjustments/:id
+ * @desc    Get adjustment details
+ * @access  Private
+ */
+router.get('/adjustments/:id(\\d+)',
+  authenticateToken,
+  stockAdjustmentController.getById
+);
+
+/**
+ * @route   POST /api/stock/adjustments/:id/approve
+ * @desc    Approve adjustment and update stock
+ * @access  Private (Admin)
+ */
+router.post('/adjustments/:id(\\d+)/approve',
+  authenticateToken,
+  authorize('ADMIN'),
+  stockAdjustmentController.approve
+);
+
+/**
+ * @route   GET /api/stock/transfers
+ * @desc    List stock transfers
+ * @access  Private
+ */
+router.get('/transfers',
+  authenticateToken,
+  stockTransferController.list
+);
+
+/**
+ * @route   POST /api/stock/transfers
+ * @desc    Create stock transfer (draft)
+ * @access  Private (Admin, Warehouse)
+ */
+router.post('/transfers',
+  authenticateToken,
+  authorize('ADMIN', 'WAREHOUSE'),
+  [
+    body('source_warehouse_id').isInt({ min: 1 }),
+    body('destination_warehouse_id').isInt({ min: 1 }),
+    body('items').isArray({ min: 1 })
+  ],
+  stockTransferController.create
+);
+
+/**
+ * @route   GET /api/stock/transfers/:id
+ * @desc    Get transfer details
+ * @access  Private
+ */
+router.get('/transfers/:id(\\d+)',
+  authenticateToken,
+  stockTransferController.getById
+);
+
+/**
+ * @route   PUT /api/stock/transfers/:id/status
+ * @desc    Update transfer status (IN_TRANSIT, COMPLETED)
+ * @access  Private (Admin, Warehouse)
+ */
+router.put('/transfers/:id(\\d+)/status',
+  authenticateToken,
+  authorize('ADMIN', 'WAREHOUSE'),
+  stockTransferController.updateStatus
+);
 
 /**
  * @route   GET /api/ledger/:stock_entry_id
@@ -148,6 +267,7 @@ router.get('/ledger/:stock_entry_id',
   [
     param('stock_entry_id').isInt({ min: 1 }).withMessage('Valid stock entry ID is required')
   ],
+  cacheMiddleware('stock', 60),
   stockController.getLedger
 );
 
@@ -158,9 +278,8 @@ router.get('/ledger/:stock_entry_id',
  */
 router.get('/ledger',
   authenticateToken,
+  cacheMiddleware('stock', 60),
   stockController.listLedger
 );
-
-
 
 module.exports = router;

@@ -23,7 +23,9 @@ api.interceptors.request.use(
     if (import.meta.env.DEV) {
       console.log('🚀 API Request:', {
         method: config.method?.toUpperCase(),
+        baseURL: config.baseURL,
         url: config.url,
+        params: config.params,
         data: config.data,
       });
     }
@@ -55,7 +57,10 @@ api.interceptors.response.use(
     if (import.meta.env.DEV) {
       console.error('❌ API Error:', {
         status: error.response?.status,
+        method: error.config?.method?.toUpperCase(),
         url: error.config?.url,
+        data: error.config?.data,
+        response: error.response?.data,
         message: error.response?.data?.message || error.message,
       });
     }
@@ -170,9 +175,25 @@ const apiService = {
     update: (id, data) => api.put(`/stock/${id}`, data),
     delete: (id) => api.delete(`/stock/${id}`),
     summary: (params) => api.get('/stock/summary', { params }),
-    ledger: (stockEntryId) => api.get(`/ledger/${stockEntryId}`),
-    ledgerList: (params) => api.get('/ledger', { params }),
+    ledger: (stockEntryId) => api.get(`/stock/ledger/${stockEntryId}`),
+    ledgerList: (params) => api.get('/stock/ledger', { params }),
     trends: (params) => api.get('/stock/trends', { params }),
+
+    // Adjustments
+    adjustments: {
+      list: (params) => api.get('/stock/adjustments', { params }),
+      get: (id) => api.get(`/stock/adjustments/${id}`),
+      create: (data) => api.post('/stock/adjustments', data),
+      approve: (id) => api.post(`/stock/adjustments/${id}/approve`),
+    },
+
+    // Transfers
+    transfers: {
+      list: (params) => api.get('/stock/transfers', { params }),
+      get: (id) => api.get(`/stock/transfers/${id}`),
+      create: (data) => api.post('/stock/transfers', data),
+      updateStatus: (id, status) => api.put(`/stock/transfers/${id}/status`, { status }),
+    },
   },
 
   // Waste
@@ -233,8 +254,22 @@ const apiService = {
     get: (id) => api.get(`/invoices/${id}`),
     create: (data) => api.post('/invoices', data),
     update: (id, data) => api.put(`/invoices/${id}`, data),
+    updateStatus: (id, status) => api.patch(`/invoices/${id}/status`, { status }),
+    delete: (id) => api.delete(`/invoices/${id}`),
+    download: (id) => api.get(`/invoices/${id}/download`, { responseType: 'blob' }),
     download: (id) => api.get(`/invoices/${id}/download`, { responseType: 'blob' }),
     getNextNumber: () => api.get('/invoices/next-number'),
+  },
+
+  // Quotations
+  quotations: {
+    list: (params) => api.get('/quotations', { params }),
+    get: (id) => api.get(`/quotations/${id}`),
+    create: (data) => api.post('/quotations', data),
+    update: (id, data) => api.put(`/quotations/${id}`, data),
+    updateStatus: (id, status) => api.patch(`/quotations/${id}/status`, { status }),
+    delete: (id) => api.delete(`/quotations/${id}`),
+    convert: (id) => api.post(`/quotations/${id}/convert`),
   },
 
   // Expenses
@@ -288,6 +323,43 @@ const apiService = {
   settings: {
     get: () => api.get('/settings'),
     update: (data) => api.put('/settings', data),
+  },
+
+  // Delivery Notes
+  deliveryNotes: {
+    list: (params) => api.get('/delivery-notes', { params }),
+    get: (id) => api.get(`/delivery-notes/${id}`),
+    create: (data) => api.post('/delivery-notes', data),
+    updateStatus: (id, status) => api.patch(`/delivery-notes/${id}/status`, { status }),
+    delete: (id) => api.delete(`/delivery-notes/${id}`),
+  },
+
+  // POS (Point of Sale)
+  pos: {
+    // Dashboard
+    getDashboard: () => api.get('/pos/dashboard'),
+    listSessions: (params) => api.get('/pos/sessions', { params }),
+
+    // Session Management
+    openSession: (data) => api.post('/pos/sessions/open', data),
+    closeSession: (id, data) => api.post(`/pos/sessions/${id}/close`, data),
+    getCurrentSession: () => api.get('/pos/sessions/current'),
+    getSessionSummary: (id) => api.get(`/pos/sessions/${id}/summary`),
+    getSessionOrders: (id, params) => api.get(`/pos/sessions/${id}/orders`, { params }),
+
+    // Products
+    getProducts: (params) => api.get('/pos/products', { params }),
+
+    // Orders
+    completeSale: (data) => api.post('/pos/orders', data),
+    voidOrder: (id) => api.post(`/pos/orders/${id}/void`),
+    getReceipt: (id) => api.get(`/pos/orders/${id}/receipt`),
+
+    // Park / Resume
+    parkOrder: (data) => api.post('/pos/orders/park', data),
+    getParkedOrders: (params) => api.get('/pos/orders/parked', { params }),
+    resumeParkedOrder: (id) => api.get(`/pos/orders/parked/${id}`),
+    deleteParkedOrder: (id) => api.delete(`/pos/orders/parked/${id}`),
   },
 
   // Health check

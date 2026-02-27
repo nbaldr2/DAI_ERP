@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { StockEntry, Product, Warehouse, InventoryLedger } = require('../models');
+const notificationService = require('../services/notificationService');
 const { Op } = require('sequelize');
 
 // Alert configuration
@@ -73,7 +74,7 @@ async function checkExpiringStock() {
 
     itemsWithStock.forEach(item => {
       const urgencySymbol = item.days_until_expiry <= 3 ? '🔴' :
-                            item.days_until_expiry <= 5 ? '🟠' : '🟡';
+        item.days_until_expiry <= 5 ? '🟠' : '🟡';
 
       console.log(`${urgencySymbol} ${item.product_name} (${item.product_name_ar})`);
       console.log(`   Warehouse: ${item.warehouse}`);
@@ -84,9 +85,16 @@ async function checkExpiringStock() {
 
     console.log('═══════════════════════════════════════════════════════════');
 
-    // TODO: Send email/SMS notifications to relevant users
-    // TODO: Store alerts in a dedicated alerts table
-    // TODO: Push notifications to frontend dashboard
+    // Create notifications for expiring items
+    for (const item of itemsWithStock) {
+      await notificationService.notifyRole({
+        type: item.days_until_expiry <= 3 ? 'ERROR' : 'WARNING',
+        title: 'Stock Expiry Alert',
+        message: `${item.product_name} in ${item.warehouse} expires in ${item.days_until_expiry} days. Qty: ${item.available_qty}`,
+        reference_id: item.stock_entry_id,
+        reference_type: 'STOCK_ENTRY'
+      }, ['ADMIN', 'WAREHOUSE']);
+    }
 
     return itemsWithStock;
   } catch (error) {
@@ -135,11 +143,17 @@ async function checkExpiredStock() {
       }
     }
 
-    if (expiredWithStock.length > 0) {
-      console.log('🚨 CRITICAL: Found', expiredWithStock.length, 'EXPIRED items with available stock:');
-      expiredWithStock.forEach(item => {
-        console.log(`   - ${item.product_name}: ${item.available_qty} kg (expired: ${item.expiry_date})`);
-      });
+    console.log('🚨 CRITICAL: Found', expiredWithStock.length, 'EXPIRED items with available stock:');
+    for (const item of expiredWithStock) {
+      console.log(`   - ${item.product_name}: ${item.available_qty} kg (expired: ${item.expiry_date})`);
+
+      await notificationService.notifyRole({
+        type: 'ERROR',
+        title: 'Stock Expired',
+        message: `${item.product_name} in ${item.warehouse} HAS EXPIRED on ${item.expiry_date}. Qty: ${item.available_qty}`,
+        reference_id: item.stock_entry_id,
+        reference_type: 'STOCK_ENTRY'
+      }, ['ADMIN', 'WAREHOUSE']);
     }
 
     return expiredWithStock;

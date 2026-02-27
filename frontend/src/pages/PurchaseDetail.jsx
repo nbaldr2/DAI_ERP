@@ -135,13 +135,13 @@ const PurchaseDetail = () => {
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       case 'draft':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-card-hover text-text-primary';
       case 'ordered':
         return 'bg-blue-100 text-blue-800';
       case 'received':
         return 'bg-purple-100 text-purple-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-card-hover text-text-primary';
     }
   };
 
@@ -154,13 +154,13 @@ const PurchaseDetail = () => {
       case 'cancelled':
         return <XCircle className="w-5 h-5 text-red-600" />;
       case 'draft':
-        return <FileText className="w-5 h-5 text-gray-600" />;
+        return <FileText className="w-5 h-5 text-text-secondary" />;
       case 'ordered':
         return <Truck className="w-5 h-5 text-blue-600" />;
       case 'received':
         return <Package className="w-5 h-5 text-purple-600" />;
       default:
-        return <FileText className="w-5 h-5 text-gray-600" />;
+        return <FileText className="w-5 h-5 text-text-secondary" />;
     }
   };
 
@@ -176,10 +176,10 @@ const PurchaseDetail = () => {
     return (
       <div className="text-center py-12">
         <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-text-primary mb-2">
           {t('purchases.not_found.title', 'Purchase Order Not Found')}
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-text-secondary mb-6">
           {t('purchases.not_found.description', 'The purchase order you are looking for does not exist or has been removed.')}
         </p>
         <Button onClick={() => navigate('/purchases')}>
@@ -204,10 +204,10 @@ const PurchaseDetail = () => {
             {t('common.back', 'Back')}
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-text-primary">
               {purchase.po_number || `PO-${purchase.id}`}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-text-secondary mt-1">
               {t('purchases.created_at', 'Created')}: {format(new Date(purchase.created_at), 'MMM dd, yyyy')}
             </p>
           </div>
@@ -237,11 +237,11 @@ const PurchaseDetail = () => {
       <Card className="p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-gray-100">
+            <div className="p-2 rounded-full bg-card-hover">
               {getStatusIcon(purchase.status)}
             </div>
             <div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-text-secondary">
                 {t('purchases.current_status', 'Current Status')}:
               </p>
               <div className="flex items-center gap-2">
@@ -348,13 +348,13 @@ const PurchaseDetail = () => {
         {/* Purchase Order Details */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary mb-4">
               {t('purchases.details', 'Purchase Order Details')}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                <h3 className="text-sm font-medium text-text-secondary mb-2">
                   {t('purchases.supplier_info', 'Supplier Information')}
                 </h3>
                 <div className="flex items-start gap-3">
@@ -362,13 +362,13 @@ const PurchaseDetail = () => {
                     <Building className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-base font-medium text-gray-900">
+                    <p className="text-base font-medium text-text-primary">
                       {purchase.supplier?.name || 'N/A'}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-text-secondary">
                       {purchase.supplier?.email || 'N/A'}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-text-secondary">
                       {purchase.supplier?.phone || 'N/A'}
                     </p>
                   </div>
@@ -376,36 +376,36 @@ const PurchaseDetail = () => {
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                <h3 className="text-sm font-medium text-text-secondary mb-2">
                   {t('purchases.order_info', 'Order Information')}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">
+                    <Calendar className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm text-text-secondary">
                       {t('purchases.order_date', 'Order Date')}:
                     </span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-text-primary">
                       {purchase.order_date ? format(new Date(purchase.order_date), 'MMM dd, yyyy') : 'N/A'}
                     </span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">
+                    <Truck className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm text-text-secondary">
                       {t('purchases.expected_date', 'Expected Delivery')}:
                     </span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-text-primary">
                       {purchase.expected_date ? format(new Date(purchase.expected_date), 'MMM dd, yyyy') : 'N/A'}
                     </span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600">
+                    <FileText className="w-4 h-4 text-text-secondary" />
+                    <span className="text-sm text-text-secondary">
                       {t('purchases.po_number', 'PO Number')}:
                     </span>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-text-primary">
                       {purchase.po_number || `PO-${purchase.id}`}
                     </span>
                   </div>
@@ -414,11 +414,11 @@ const PurchaseDetail = () => {
             </div>
             
             {purchase.notes && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
+              <div className="mt-6 p-4 bg-background rounded-lg">
+                <h3 className="text-sm font-medium text-text-secondary mb-2">
                   {t('purchases.notes', 'Notes')}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-text-secondary">
                   {purchase.notes}
                 </p>
               </div>
@@ -428,73 +428,73 @@ const PurchaseDetail = () => {
           {/* Items List */}
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-text-primary">
                 {t('purchases.items', 'Items')}
               </h2>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-text-secondary">
                 {t('purchases.total_items', 'Total Items')}: {items.length}
               </div>
             </div>
             
             {items.length === 0 ? (
-              <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-                <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600">
+              <div className="text-center py-8 border-2 border-dashed border-theme-border rounded-lg">
+                <Package className="w-12 h-12 text-text-secondary mx-auto mb-2" />
+                <p className="text-text-secondary">
                   {t('purchases.no_items', 'No items in this purchase order')}
                 </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-background">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                         {t('purchases.table.product', 'Product')}
                       </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                         {t('purchases.table.quantity', 'Quantity')}
                       </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                         {t('purchases.table.unit_price', 'Unit Price')}
                       </th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-2 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                         {t('purchases.table.total', 'Total')}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-card divide-y divide-theme-border">
                     {items.map((item, index) => (
                       <tr key={index}>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-text-primary">
                             {item.product?.name_en && item.product?.name_ar 
                               ? `${item.product.name_en} - ${item.product.name_ar}`
                               : item.product?.name || item.product?.name_en || item.product?.name_ar || 'Unknown Product'}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-right">
-                          <div className="text-sm text-gray-900">
+                          <div className="text-sm text-text-primary">
                             {item.quantity || item.qty || 0}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-right">
-                          <div className="text-sm text-gray-900">
+                          <div className="text-sm text-text-primary">
                             QAR {parseFloat(item.unit_price || 0).toFixed(2)}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-right">
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-sm font-medium text-text-primary">
                             QAR {parseFloat(item.total_price || 0).toFixed(2)}
                           </div>
                         </td>
                       </tr>
                     ))}
-                    <tr className="bg-gray-50">
+                    <tr className="bg-background">
                       <td colSpan="3" className="px-4 py-3 text-right font-medium">
                         {t('purchases.table.grand_total', 'Grand Total')}:
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="text-lg font-bold text-gray-900">
+                        <div className="text-lg font-bold text-text-primary">
                           QAR {calculateTotal().toFixed(2)}
                         </div>
                       </td>
@@ -509,43 +509,43 @@ const PurchaseDetail = () => {
         {/* Summary Panel */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary mb-4">
               {t('purchases.summary.title', 'Order Summary')}
             </h2>
             
             <div className="space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-sm text-gray-600">
+              <div className="flex justify-between items-center pb-3 border-b border-theme-border">
+                <span className="text-sm text-text-secondary">
                   {t('purchases.summary.subtotal', 'Subtotal')}:
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-text-primary">
                   QAR {calculateTotal().toFixed(2)}
                 </span>
               </div>
               
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-sm text-gray-600">
+              <div className="flex justify-between items-center pb-3 border-b border-theme-border">
+                <span className="text-sm text-text-secondary">
                   {t('purchases.summary.items_count', 'Items Count')}:
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-text-primary">
                   {items.length}
                 </span>
               </div>
               
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-sm text-gray-600">
+              <div className="flex justify-between items-center pb-3 border-b border-theme-border">
+                <span className="text-sm text-text-secondary">
                   {t('purchases.summary.total_quantity', 'Total Quantity')}:
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-text-primary">
                   {items.reduce((sum, item) => sum + parseFloat(item.quantity || item.qty || 0), 0)}
                 </span>
               </div>
               
               <div className="flex justify-between items-center pt-2">
-                <span className="text-base font-medium text-gray-800">
+                <span className="text-base font-medium text-text-primary">
                   {t('purchases.summary.grand_total', 'Grand Total')}:
                 </span>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold text-text-primary">
                   QAR {calculateTotal().toFixed(2)}
                 </span>
               </div>
@@ -554,15 +554,15 @@ const PurchaseDetail = () => {
           
           {/* Waste & Damage Totals */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary mb-4">
               {t('purchases.summary.waste_damage_title', 'Wastes & Damages')}
             </h2>
             <div className="space-y-4">
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-sm text-gray-600">
+              <div className="flex justify-between items-center pb-3 border-b border-theme-border">
+                <span className="text-sm text-text-secondary">
                   {t('purchases.summary.total_waste', 'Total Waste')}:
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-text-primary">
                   {wasteLoading ? (
                     <LoadingSpinner size="sm" />
                   ) : (
@@ -570,11 +570,11 @@ const PurchaseDetail = () => {
                   )}
                 </span>
               </div>
-              <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                <span className="text-sm text-gray-600">
+              <div className="flex justify-between items-center pb-3 border-b border-theme-border">
+                <span className="text-sm text-text-secondary">
                   {t('purchases.summary.total_damage', 'Total Damage')}:
                 </span>
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-text-primary">
                   {wasteLoading ? (
                     <LoadingSpinner size="sm" />
                   ) : (
@@ -583,10 +583,10 @@ const PurchaseDetail = () => {
                 </span>
               </div>
               <div className="flex justify-between items-center pt-2">
-                <span className="text-base font-medium text-gray-800">
+                <span className="text-base font-medium text-text-primary">
                   {t('purchases.summary.total_waste_damage', 'Total Waste + Damage')}:
                 </span>
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold text-text-primary">
                   {wasteLoading
                     ? '—'
                     : `${(wasteTotals.totalWasteKg + wasteTotals.totalDamageKg).toFixed(2)} kg`}
@@ -596,7 +596,7 @@ const PurchaseDetail = () => {
           </Card>
           
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-text-primary mb-4">
               {t('purchases.activity', 'Activity')}
             </h2>
             
@@ -606,10 +606,10 @@ const PurchaseDetail = () => {
                   <FileText className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-text-primary">
                     {t('purchases.activity.created', 'Purchase Order Created')}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-secondary">
                     {format(new Date(purchase.created_at), 'MMM dd, yyyy HH:mm')}
                   </p>
                 </div>
@@ -621,10 +621,10 @@ const PurchaseDetail = () => {
                     <Edit className="w-4 h-4 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-text-primary">
                       {t('purchases.activity.updated', 'Purchase Order Updated')}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-text-secondary">
                       {format(new Date(purchase.updated_at), 'MMM dd, yyyy HH:mm')}
                     </p>
                   </div>

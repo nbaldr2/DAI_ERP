@@ -90,8 +90,8 @@ const SystemSettings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your company information and system preferences</p>
+        <h1 className="text-2xl font-bold text-text-primary">System Settings</h1>
+        <p className="text-text-secondary mt-1">Manage your company information and system preferences</p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -99,13 +99,13 @@ const SystemSettings = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Company Information */}
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+              <h2 className="text-lg font-semibold text-text-primary flex items-center">
                 <Building className="w-5 h-5 mr-2 text-primary-600" />
                 Company Information
               </h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Company Name *
                 </label>
                 <input
@@ -119,11 +119,11 @@ const SystemSettings = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Email *
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                   <input
                     type="email"
                     name="email"
@@ -136,11 +136,11 @@ const SystemSettings = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Phone *
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                   <input
                     type="text"
                     name="phone"
@@ -153,11 +153,11 @@ const SystemSettings = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Address *
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+                  <MapPin className="absolute left-3 top-3 text-text-secondary w-4 h-4" />
                   <textarea
                     name="address"
                     value={settings.address}
@@ -172,13 +172,13 @@ const SystemSettings = () => {
             
             {/* Additional Information */}
             <div className="space-y-6">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+              <h2 className="text-lg font-semibold text-text-primary flex items-center">
                 <FileText className="w-5 h-5 mr-2 text-primary-600" />
                 Additional Information
               </h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   PO Box *
                 </label>
                 <input
@@ -192,7 +192,7 @@ const SystemSettings = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   CR Number *
                 </label>
                 <input
@@ -206,13 +206,13 @@ const SystemSettings = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Logo URL
                 </label>
                 <div className="flex items-start space-x-3">
                   <div className="flex-1">
                     <div className="relative">
-                      <Camera className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Camera className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                       <input
                         type="text"
                         name="logo_url"
@@ -240,7 +240,7 @@ const SystemSettings = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     <Globe className="w-4 h-4 inline mr-1" />
                     Language
                   </label>
@@ -256,7 +256,7 @@ const SystemSettings = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     <CreditCard className="w-4 h-4 inline mr-1" />
                     Currency
                   </label>

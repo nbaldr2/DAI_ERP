@@ -165,6 +165,10 @@ const Invoice = sequelize.define('Invoice', {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   created_by: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -177,7 +181,7 @@ const Invoice = sequelize.define('Invoice', {
   tableName: 'invoices',
   timestamps: false,
   hooks: {
-    beforeCreate: async (invoice) => {
+    beforeValidate: async (invoice) => {
       // Generate invoice number if not provided
       if (!invoice.invoice_number) {
         // Get the last invoice to determine the next number
@@ -190,19 +194,19 @@ const Invoice = sequelize.define('Invoice', {
           order: [['id', 'DESC']],
           attributes: ['invoice_number']
         });
-        
+
         let nextNumber = 250001; // Default starting number
-        
+
         if (lastInvoice) {
           const lastNumber = parseInt(lastInvoice.invoice_number.replace('INV-', ''));
           if (!isNaN(lastNumber)) {
             nextNumber = lastNumber + 1;
           }
         }
-        
+
         invoice.invoice_number = `INV-${nextNumber.toString().padStart(6, '0')}`;
       }
-      
+
       // Calculate total_gross if not provided
       if (invoice.total_net !== null && invoice.total_tax !== null) {
         invoice.total_gross = parseFloat(invoice.total_net) + parseFloat(invoice.total_tax);

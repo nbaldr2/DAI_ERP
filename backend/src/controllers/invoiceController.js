@@ -3,12 +3,23 @@ const InvoiceItem = require('../models/InvoiceItem');
 const InvoicePayment = require('../models/InvoicePayment');
 const InvoiceAttachment = require('../models/InvoiceAttachment');
 const Customer = require('../models/Customer');
+const Supplier = require('../models/Supplier');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const { sequelize } = require('../config/database');
+const notificationService = require('../services/notificationService');
 const { Op } = require('sequelize');
 const PDFDocument = require('pdfkit');
 const moment = require('moment');
+
+const VALID_INVOICE_STATUSES = ['DRAFT', 'SENT', 'PAID', 'PARTIAL', 'OVERDUE', 'CANCELLED'];
+
+const normalizeInvoiceStatus = (status) => {
+  if (status === undefined || status === null) return null;
+  const normalized = String(status).trim().toUpperCase();
+  if (normalized === 'PENDING') return 'SENT';
+  return normalized;
+};
 
 /**
  * Get next invoice number
@@ -24,9 +35,9 @@ exports.getNextInvoiceNumber = async (req, res) => {
       },
       order: [['invoice_number', 'DESC']]
     });
-    
+
     let nextNumber = 250001; // Default starting number
-    
+
     if (lastInvoice) {
       // Extract the numeric part from invoice_number (e.g., "INV-250001" -> 250001)
       const lastNumber = parseInt(lastInvoice.invoice_number.replace('INV-', ''));
@@ -34,10 +45,10 @@ exports.getNextInvoiceNumber = async (req, res) => {
         nextNumber = lastNumber + 1;
       }
     }
-    
+
     const formattedNextNumber = `INV-${nextNumber.toString().padStart(6, '0')}`;
-    
-    res.json({ 
+
+    res.json({
       success: true,
       data: {
         next_invoice_number: formattedNextNumber,
@@ -59,12 +70,12 @@ exports.getAllInvoices = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
     const status = req.query.status || null;
-    
+
     const whereClause = { deleted_at: null };
     if (status) {
       whereClause.status = status;
     }
-    
+
     const { count, rows } = await Invoice.findAndCountAll({
       where: whereClause,
       include: [
@@ -76,7 +87,7 @@ exports.getAllInvoices = async (req, res) => {
       offset,
       distinct: true
     });
-    
+
     res.json({
       total: count,
       page,
@@ -104,18 +115,18 @@ exports.getInvoiceById = async (req, res) => {
           model: InvoiceItem,
           as: 'items',
           include: [
-            { model: Product, as: 'product', attributes: ['id', 'name_en', 'name_ar', 'unit', 'category', 'origin'] }
+            { model: Product, as: 'product', attributes: ['id', 'name_en', 'name_ar', 'unit', 'category', 'origin', 'description'] }
           ]
         },
         { model: InvoicePayment, as: 'payments' },
         { model: InvoiceAttachment, as: 'attachments' }
       ]
     });
-    
+
     if (!invoice) {
       return res.status(404).json({ message: 'Invoice not found' });
     }
-    
+
     res.json(invoice);
   } catch (error) {
     console.error('Error fetching invoice:', error);
@@ -128,7 +139,7 @@ exports.getInvoiceById = async (req, res) => {
  */
 exports.createInvoice = async (req, res) => {
   const transaction = await sequelize.transaction();
-  
+
   try {
     const {
       invoice_number,
@@ -152,12 +163,12 @@ exports.createInvoice = async (req, res) => {
       payments = [],
       attachments = []
     } = req.body;
-    
+
     // Validate required fields
     if (!customer_id || !invoice_date || !due_date || !items || !items.length) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-    
+
     // Create invoice
     const invoice = await Invoice.create({
       invoice_number,
@@ -179,7 +190,7 @@ exports.createInvoice = async (req, res) => {
       terms,
       created_by: req.user.id
     }, { transaction });
-    
+
     // Create invoice items
     const invoiceItems = await Promise.all(
       items.map(item => {
@@ -244,12 +255,12 @@ exports.createInvoice = async (req, res) => {
         await invoice.update({ status: newStatus }, { transaction });
       }
     }
-    
+
     // Update customer balance if payment mode is "Customer Balance"
     console.log('=== Customer Balance Update Process ===');
     console.log('Payment mode:', payment_mode);
     console.log('Invoice total:', total);
-    
+
     if (payment_mode === 'customer_balance') {
       console.log('\n[1] Finding customer:', customer_id);
       const customer = await Customer.findByPk(customer_id, { transaction });
@@ -264,7 +275,7 @@ exports.createInvoice = async (req, res) => {
         current_balance: customer.balance,
         credit_limit: customer.credit_limit
       });
-      
+
       // Check if customer has enough balance
       const availableBalance = customer.credit_limit - customer.balance;
       console.log('\n[2] Checking available balance:', {
@@ -273,7 +284,7 @@ exports.createInvoice = async (req, res) => {
         available_balance: availableBalance,
         invoice_total: total
       });
-      
+
       if (availableBalance < total) {
         console.error('Insufficient balance:', {
           available: availableBalance,
@@ -281,13 +292,13 @@ exports.createInvoice = async (req, res) => {
           shortage: total - availableBalance
         });
         await transaction.rollback();
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: 'Insufficient customer balance',
           availableBalance,
           requiredAmount: total
         });
       }
-      
+
       // Update customer balance by adding the invoice total to their current balance
       console.log('\n[3] Updating customer balance:', {
         customer_id: customer.id,
@@ -295,11 +306,11 @@ exports.createInvoice = async (req, res) => {
         amount_to_add: total,
         new_balance: parseFloat(customer.balance) + parseFloat(total)
       });
-      
+
       await customer.update({
         balance: sequelize.literal(`balance + ${total}`)
       }, { transaction });
-      
+
       // Verify the update
       const updatedCustomer = await Customer.findByPk(customer_id, { transaction });
       console.log('\n[4] Balance update verification:', {
@@ -310,9 +321,18 @@ exports.createInvoice = async (req, res) => {
         update_successful: parseFloat(updatedCustomer.balance) === parseFloat(customer.balance) + parseFloat(total)
       });
     }
-    
+
     await transaction.commit();
-    
+
+    // Send notification to Admin and Accountant
+    await notificationService.notifyRole({
+      type: 'INFO',
+      title: 'New Invoice Created',
+      message: `Invoice #${invoice.invoice_number} created for ${total} ${currency}.`,
+      reference_id: invoice.id,
+      reference_type: 'INVOICE'
+    }, ['ADMIN', 'ACCOUNTANT']);
+
     res.status(201).json({
       message: 'Invoice created successfully',
       invoice: {
@@ -339,11 +359,11 @@ exports.downloadInvoicePdf = async (req, res) => {
       include: [
         { model: Customer, as: 'customer' },
         { model: User, as: 'creator', attributes: ['id', 'name', 'username'] },
-        { 
-          model: InvoiceItem, 
+        {
+          model: InvoiceItem,
           as: 'items',
           include: [
-            { model: Product, as: 'product', attributes: ['id', 'name_en', 'name_ar', 'unit', 'category', 'origin'] }
+            { model: Product, as: 'product', attributes: ['id', 'name_en', 'name_ar', 'unit', 'category', 'origin', 'description'] }
           ]
         },
         { model: InvoicePayment, as: 'payments' },
@@ -485,16 +505,16 @@ exports.downloadInvoicePdf = async (req, res) => {
  */
 exports.updateInvoice = async (req, res) => {
   const transaction = await sequelize.transaction();
-  
+
   try {
     const invoice = await Invoice.findOne({
       where: { id: req.params.id, deleted_at: null }
     });
-    
+
     if (!invoice) {
       return res.status(404).json({ message: 'Invoice not found' });
     }
-    
+
     const {
       invoice_number,
       reference,
@@ -514,12 +534,19 @@ exports.updateInvoice = async (req, res) => {
       client_note,
       terms,
       items,
-      payments = [],
-      attachments = []
+      payments,
+      attachments
     } = req.body;
-    
-    // Update invoice
-    await invoice.update({
+
+    const normalizedStatus = normalizeInvoiceStatus(status);
+    if (status !== undefined && (!normalizedStatus || !VALID_INVOICE_STATUSES.includes(normalizedStatus))) {
+      await transaction.rollback();
+      return res.status(400).json({
+        message: `Invalid status. Valid statuses are: ${VALID_INVOICE_STATUSES.join(', ')}`
+      });
+    }
+
+    const updatePayload = {
       invoice_number,
       reference,
       customer_id,
@@ -533,76 +560,91 @@ exports.updateInvoice = async (req, res) => {
       subtotal,
       total_discount,
       total,
-      status,
+      status: status === undefined ? undefined : normalizedStatus,
       admin_note,
       client_note,
       terms
-    }, { transaction });
-    
-    // Delete existing items
-    await InvoiceItem.destroy({
-      where: { invoice_id: invoice.id },
-      transaction
+    };
+
+    Object.keys(updatePayload).forEach((key) => {
+      if (updatePayload[key] === undefined) delete updatePayload[key];
     });
-    
-    // Create new items
-    const invoiceItems = await Promise.all(
-      items.map(item => {
-        return InvoiceItem.create({
-          invoice_id: invoice.id,
-          product_id: item.product_id,
-          description: item.description,
-          quantity: item.quantity,
-          rate: item.rate,
-          discount: item.discount || 0,
-          amount: item.amount
-        }, { transaction });
-      })
-    );
 
-    // Replace payments if provided
-    await InvoicePayment.destroy({ where: { invoice_id: invoice.id }, transaction });
+    await invoice.update(updatePayload, { transaction });
+
+    let invoiceItems = [];
+    if (Array.isArray(items)) {
+      await InvoiceItem.destroy({
+        where: { invoice_id: invoice.id },
+        transaction
+      });
+
+      invoiceItems = await Promise.all(
+        items.map(item => {
+          return InvoiceItem.create({
+            invoice_id: invoice.id,
+            product_id: item.product_id,
+            description: item.description,
+            quantity: item.quantity,
+            rate: item.rate,
+            discount: item.discount || 0,
+            amount: item.amount
+          }, { transaction });
+        })
+      );
+    } else {
+      invoiceItems = await InvoiceItem.findAll({ where: { invoice_id: invoice.id }, transaction });
+    }
+
     let updatedPayments = [];
-    if (Array.isArray(payments) && payments.length > 0) {
-      updatedPayments = await Promise.all(
-        payments.map(p => {
-          return InvoicePayment.create({
-            invoice_id: invoice.id,
-            amount: p.amount,
-            payment_date: p.payment_date || invoice_date,
-            payment_method: p.payment_method || 'other',
-            reference: p.reference,
-            notes: p.notes,
-            created_by: req.user.id
-          }, { transaction });
-        })
-      );
+    if (Array.isArray(payments)) {
+      await InvoicePayment.destroy({ where: { invoice_id: invoice.id }, transaction });
+      if (payments.length > 0) {
+        updatedPayments = await Promise.all(
+          payments.map(p => {
+            return InvoicePayment.create({
+              invoice_id: invoice.id,
+              amount: p.amount,
+              payment_date: p.payment_date || invoice_date,
+              payment_method: p.payment_method || 'other',
+              reference: p.reference,
+              notes: p.notes,
+              created_by: req.user.id
+            }, { transaction });
+          })
+        );
+      }
+    } else {
+      updatedPayments = await InvoicePayment.findAll({ where: { invoice_id: invoice.id }, transaction });
     }
 
-    // Replace attachments if provided
-    await InvoiceAttachment.destroy({ where: { invoice_id: invoice.id }, transaction });
     let updatedAttachments = [];
-    if (Array.isArray(attachments) && attachments.length > 0) {
-      updatedAttachments = await Promise.all(
-        attachments.map(a => {
-          return InvoiceAttachment.create({
-            invoice_id: invoice.id,
-            file_name: a.file_name,
-            file_path: a.file_path,
-            file_type: a.file_type,
-            file_size: a.file_size,
-            uploaded_by: req.user.id,
-            uploaded_at: a.uploaded_at || new Date()
-          }, { transaction });
-        })
-      );
+    if (Array.isArray(attachments)) {
+      await InvoiceAttachment.destroy({ where: { invoice_id: invoice.id }, transaction });
+      if (attachments.length > 0) {
+        updatedAttachments = await Promise.all(
+          attachments.map(a => {
+            return InvoiceAttachment.create({
+              invoice_id: invoice.id,
+              file_name: a.file_name,
+              file_path: a.file_path,
+              file_type: a.file_type,
+              file_size: a.file_size,
+              uploaded_by: req.user.id,
+              uploaded_at: a.uploaded_at || new Date()
+            }, { transaction });
+          })
+        );
+      }
+    } else {
+      updatedAttachments = await InvoiceAttachment.findAll({ where: { invoice_id: invoice.id }, transaction });
     }
-    
+
     // Update customer balance if payment mode is "Customer Balance"
     console.log('=== Customer Balance Update Process (Update Invoice) ===');
     console.log('Payment mode:', payment_mode);
     console.log('Invoice total:', total);
-    
+
     if (payment_mode === 'customer_balance') {
       console.log('\n[1] Finding customer:', customer_id);
       const customer = await Customer.findByPk(customer_id, { transaction });
@@ -610,7 +652,7 @@ exports.updateInvoice = async (req, res) => {
         await transaction.rollback();
         return res.status(404).json({ message: 'Customer not found' });
       }
-      
+
       // Check if customer has enough balance
       const availableBalance = customer.credit_limit - customer.balance;
       console.log('\n[2] Checking available balance:', {
@@ -619,7 +661,7 @@ exports.updateInvoice = async (req, res) => {
         available_balance: availableBalance,
         invoice_total: total
       });
-      
+
       if (availableBalance < total) {
         console.error('Insufficient balance:', {
           available: availableBalance,
@@ -627,13 +669,13 @@ exports.updateInvoice = async (req, res) => {
           shortage: total - availableBalance
         });
         await transaction.rollback();
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: 'Insufficient customer balance',
           availableBalance,
           requiredAmount: total
         });
       }
-      
+
       // Update customer balance by adding the invoice total to their current balance
       console.log('\n[3] Updating customer balance:', {
         customer_id: customer.id,
@@ -641,11 +683,11 @@ exports.updateInvoice = async (req, res) => {
         amount_to_add: total,
         new_balance: parseFloat(customer.balance) + parseFloat(total)
       });
-      
+
       await customer.update({
         balance: sequelize.literal(`balance + ${total}`)
       }, { transaction });
-      
+
       // Verify the update
       const updatedCustomer = await Customer.findByPk(customer_id, { transaction });
       console.log('\n[4] Balance update verification:', {
@@ -656,9 +698,9 @@ exports.updateInvoice = async (req, res) => {
         update_successful: parseFloat(updatedCustomer.balance) === parseFloat(customer.balance) + parseFloat(total)
       });
     }
-    
+
     await transaction.commit();
-    
+
     res.json({
       message: 'Invoice updated successfully',
       invoice: {
@@ -670,7 +712,12 @@ exports.updateInvoice = async (req, res) => {
     });
   } catch (error) {
     await transaction.rollback();
-    console.error('Error updating invoice:', error);
+    console.error('Error updating invoice:', {
+      invoiceId: req.params?.id,
+      body: req.body,
+      message: error.message,
+      stack: error.stack
+    });
     res.status(500).json({ message: 'Failed to update invoice', error: error.message });
   }
 };
@@ -683,13 +730,13 @@ exports.deleteInvoice = async (req, res) => {
     const invoice = await Invoice.findOne({
       where: { id: req.params.id, deleted_at: null }
     });
-    
+
     if (!invoice) {
       return res.status(404).json({ message: 'Invoice not found' });
     }
-    
+
     await invoice.update({ deleted_at: new Date() });
-    
+
     res.json({ message: 'Invoice deleted successfully' });
   } catch (error) {
     console.error('Error deleting invoice:', error);
@@ -705,26 +752,26 @@ exports.getInvoiceStats = async (req, res) => {
     const totalInvoices = await Invoice.count({
       where: { deleted_at: null }
     });
-    
+
     const draftInvoices = await Invoice.count({
       where: { status: 'draft', deleted_at: null }
     });
-    
+
     const paidInvoices = await Invoice.count({
       where: { status: 'paid', deleted_at: null }
     });
-    
+
     const overdueInvoices = await Invoice.count({
-      where: { 
-        status: 'overdue', 
-        deleted_at: null 
+      where: {
+        status: 'overdue',
+        deleted_at: null
       }
     });
-    
+
     const totalAmount = await Invoice.sum('total', {
       where: { deleted_at: null }
     });
-    
+
     res.json({
       totalInvoices,
       draftInvoices,
@@ -735,5 +782,82 @@ exports.getInvoiceStats = async (req, res) => {
   } catch (error) {
     console.error('Error fetching invoice statistics:', error);
     res.status(500).json({ message: 'Failed to fetch invoice statistics', error: error.message });
+  }
+};
+
+/**
+ * Update invoice status
+ */
+exports.updateInvoiceStatus = async (req, res) => {
+  let transaction;
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const normalizedStatus = normalizeInvoiceStatus(status);
+
+    if (!normalizedStatus || !VALID_INVOICE_STATUSES.includes(normalizedStatus)) {
+      console.warn('Invalid invoice status update request', {
+        invoiceId: id,
+        status
+      });
+      return res.status(400).json({
+        message: `Invalid status. Valid statuses are: ${VALID_INVOICE_STATUSES.join(', ')}`
+      });
+    }
+
+    transaction = await sequelize.transaction();
+
+    const invoice = await Invoice.findOne({
+      where: { id: id, deleted_at: null },
+      transaction,
+      lock: transaction.LOCK.UPDATE
+    });
+
+    if (!invoice) {
+      await transaction.rollback();
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    await invoice.update({ status: normalizedStatus }, { transaction });
+
+    await transaction.commit();
+
+    const updatedInvoice = await Invoice.findByPk(id, {
+      include: [
+        { model: Customer, as: 'customer' },
+        { model: Supplier, as: 'supplier' },
+        { model: User, as: 'creator', attributes: ['id', 'username', 'name'] },
+        {
+          model: InvoiceItem,
+          as: 'items',
+          include: [
+            { model: Product, as: 'product', attributes: ['id', 'name_en', 'name_ar', 'unit', 'category', 'origin'] }
+          ]
+        },
+        { model: InvoicePayment, as: 'payments' },
+        { model: InvoiceAttachment, as: 'attachments' }
+      ]
+    });
+
+    res.json({
+      success: true,
+      message: 'Invoice status updated successfully',
+      data: updatedInvoice
+    });
+  } catch (error) {
+    if (transaction) {
+      try {
+        await transaction.rollback();
+      } catch (rollbackError) {
+        console.error('Error rolling back invoice status update:', rollbackError);
+      }
+    }
+    console.error('Error updating invoice status:', {
+      invoiceId: req.params?.id,
+      status: req.body?.status,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ message: 'Failed to update invoice status', error: error.message });
   }
 };

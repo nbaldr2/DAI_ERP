@@ -19,6 +19,7 @@ const InvoiceCreate = () => {
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [productSearch, setProductSearch] = useState('');
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
@@ -59,6 +60,20 @@ const InvoiceCreate = () => {
     fetchNextInvoiceNumber();
   }, []);
 
+
+  // Debounced product search
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (productSearch) {
+        fetchProducts(productSearch);
+      } else {
+        fetchProducts();
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [productSearch]);
+
   const fetchCustomers = async () => {
     try {
       setLoadingCustomers(true);
@@ -72,10 +87,14 @@ const InvoiceCreate = () => {
     }
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (searchTerm = '') => {
     try {
       setLoadingProducts(true);
-      const response = await apiService.products.list({ limit: 100 });
+      const params = { limit: 100 };
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      const response = await apiService.products.list(params);
       setProducts(response.data.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -109,7 +128,7 @@ const InvoiceCreate = () => {
 
   const handleCustomerChange = async (customerId) => {
     console.log("Selected customer ID:", customerId);
-    
+
     setFormData({
       ...formData,
       customer_id: customerId,
@@ -119,12 +138,12 @@ const InvoiceCreate = () => {
       try {
         const response = await apiService.customers.get(customerId);
         console.log("Raw customer response:", response);
-        
+
         // Check if response.data exists and has the expected structure
         if (response && response.data && response.data.data) {
           const customer = response.data.data;
           console.log("Customer data:", customer);
-          
+
           // Ensure all customer fields are properly set with default values if missing
           const customerData = {
             id: customer.id || null,
@@ -135,14 +154,14 @@ const InvoiceCreate = () => {
             balance: customer.balance !== undefined ? parseFloat(customer.balance) || 0 : 0,
             credit_limit: customer.credit_limit !== undefined ? parseFloat(customer.credit_limit) || 0 : 0
           };
-          
+
           console.log("Processed customer data:", customerData);
           setSelectedCustomer(customerData);
         } else if (response && response.data) {
           // Handle case where data is directly in response.data
           const customer = response.data;
           console.log("Customer data (direct):", customer);
-          
+
           // Ensure all customer fields are properly set with default values if missing
           const customerData = {
             id: customer.id || null,
@@ -153,7 +172,7 @@ const InvoiceCreate = () => {
             balance: customer.balance !== undefined ? parseFloat(customer.balance) || 0 : 0,
             credit_limit: customer.credit_limit !== undefined ? parseFloat(customer.credit_limit) || 0 : 0
           };
-          
+
           console.log("Processed customer data:", customerData);
           setSelectedCustomer(customerData);
         } else {
@@ -180,8 +199,10 @@ const InvoiceCreate = () => {
   };
 
   const handleItemChange = async (index, field, value) => {
+    console.log('handleItemChange called:', { index, field, value });
+
     const updatedItems = [...formData.items];
-    
+
     // Ensure value is never undefined
     const safeValue = value === undefined ? '' : value;
     updatedItems[index][field] = safeValue;
@@ -207,62 +228,68 @@ const InvoiceCreate = () => {
 
     // If product_id changed, fetch product details
     if (field === "product_id" && safeValue) {
+      console.log('Fetching product details for ID:', safeValue);
       try {
         // Fetch the specific product to get the latest price
         const response = await apiService.products.get(safeValue);
-        const product = response.data;
-        
+        const product = response.data?.data || response.data;
+
         if (product) {
-          // Combine both English and Arabic names for the description
-          const description = product.name_ar 
-            ? `${product.name_en} - ${product.name_ar}` 
-            : product.name_en || '';
+          console.log('Product found:', product);
+          // Use product description if available
+          const description = product.description || '';
           updatedItems[index].description = description;
           updatedItems[index].rate = product.price_per_unit || 0;
           updatedItems[index].quantity = 1;
           updatedItems[index].discount = 0;
-          
+
           // Recalculate amount with the new rate
           const quantity = parseFloat(updatedItems[index].quantity) || 0;
           const rate = parseFloat(product.price_per_unit) || 0;
           const discount = parseFloat(updatedItems[index].discount) || 0;
           const baseAmount = quantity * rate;
           const discountAmount = discount;
-          updatedItems[index].amount = baseAmount - discountAmount;
+          updatedItems[index].amount = parseFloat((baseAmount - discountAmount).toFixed(2));
+
+          console.log('Updated item:', updatedItems[index]);
         }
       } catch (error) {
         console.error("Error fetching product details:", error);
         toast.error("Failed to fetch product details");
-        
+
         // Fallback to cached product data
         const product = products.find(
           (p) => p.id.toString() === safeValue.toString(),
         );
         if (product) {
+          console.log('Using cached product:', product);
           // Combine both English and Arabic names for the description
-          const description = product.name_ar 
-            ? `${product.name_en} - ${product.name_ar}` 
-            : product.name_en || '';
+          const description = product.description || (product.name_ar
+            ? `${product.name_en} - ${product.name_ar}`
+            : product.name_en || '');
           updatedItems[index].description = description;
           updatedItems[index].rate = product.price_per_unit || 0;
           updatedItems[index].quantity = 1;
           updatedItems[index].discount = 0;
-          
+
           // Recalculate amount with the new rate
           const quantity = parseFloat(updatedItems[index].quantity) || 0;
           const rate = parseFloat(product.price_per_unit) || 0;
           const discount = parseFloat(updatedItems[index].discount) || 0;
           const baseAmount = quantity * rate;
-          const discountAmount = baseAmount * (discount / 100);
-          updatedItems[index].amount = baseAmount - discountAmount;
+          const discountAmount = discount;
+          updatedItems[index].amount = parseFloat((baseAmount - discountAmount).toFixed(2));
+
+          console.log('Updated item with cached data:', updatedItems[index]);
         }
       }
     }
 
-    setFormData({
-      ...formData,
+    console.log('Setting form data with updated items:', updatedItems);
+    setFormData(prevFormData => ({
+      ...prevFormData,
       items: updatedItems,
-    });
+    }));
   };
 
   const addItem = () => {
@@ -303,12 +330,13 @@ const InvoiceCreate = () => {
       0,
     );
   };
-const calculateItemDiscounts = () => {
-  return formData.items.reduce((sum, item) => {
-    const discountValue = parseFloat(item.discount) || 0;
-    return sum + discountValue;
-  }, 0);
-};
+
+  const calculateItemDiscounts = () => {
+    return formData.items.reduce((sum, item) => {
+      const discountValue = parseFloat(item.discount) || 0;
+      return sum + discountValue;
+    }, 0);
+  };
 
   const calculateInvoiceDiscount = () => {
     const subtotal = calculateSubtotal() + calculateItemDiscounts(); // Add back item discounts to get pre-discount subtotal
@@ -355,11 +383,11 @@ const calculateItemDiscounts = () => {
         total: calculateTotal(),
         customer: selectedCustomer,
         items: formData.items
-          .filter(item => item.product_id && item.quantity > 0)
           .map(item => ({
             ...item,
             product_id: parseInt(item.product_id),
-            product_name: products.find(p => p.id.toString() === item.product_id?.toString())?.name || '',
+            product_name: products.find(p => p.id.toString() === item.product_id?.toString())?.name_en || '',
+            name: products.find(p => p.id.toString() === item.product_id?.toString())?.name_en || '',
             quantity: parseFloat(item.quantity) || 0,
             rate: parseFloat(item.rate) || 0,
             discount: parseFloat(item.discount) || 0,
@@ -457,12 +485,12 @@ const calculateItemDiscounts = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-4 rounded-lg shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             {t("invoices.createTitle", "Create New Invoice")}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-text-secondary mt-1">
             {t(
               "invoices.createSubtitle",
               "Create a new invoice for a customer",
@@ -472,7 +500,7 @@ const calculateItemDiscounts = () => {
         <Button
           variant="outline"
           onClick={() => navigate("/invoices")}
-          className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-2 hover:bg-card-hover transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t("common.back", "Back to Invoices")}
@@ -487,7 +515,7 @@ const calculateItemDiscounts = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.customer", "Customer")}
               </label>
               <select
@@ -510,36 +538,36 @@ const calculateItemDiscounts = () => {
 
           {selectedCustomer && Object.keys(selectedCustomer).length > 0 && (
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gray-50 p-4 rounded-md shadow-md hover:shadow-lg transition-shadow">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
+              <div className="bg-background p-4 rounded-md shadow-md hover:shadow-lg transition-shadow">
+                <h4 className="text-sm font-medium text-text-secondary mb-2">
                   {t("invoices.billTo", "Bill To")}
                 </h4>
-                <p className="text-sm text-gray-600 font-medium">{selectedCustomer.name || 'N/A'}</p>
+                <p className="text-sm text-text-secondary font-medium">{selectedCustomer.name || 'N/A'}</p>
                 {selectedCustomer.address && (
-                  <p className="text-sm text-gray-600">{selectedCustomer.address}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.address}</p>
                 )}
                 {selectedCustomer.contact && (
-                  <p className="text-sm text-gray-600">{selectedCustomer.contact}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.contact}</p>
                 )}
                 {selectedCustomer.type && (
-                  <p className="text-sm text-gray-600">Type: {selectedCustomer.type}</p>
+                  <p className="text-sm text-text-secondary">Type: {selectedCustomer.type}</p>
                 )}
               </div>
-              <div className="bg-gray-50 p-4 rounded-md shadow-md hover:shadow-lg transition-shadow">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
+              <div className="bg-background p-4 rounded-md shadow-md hover:shadow-lg transition-shadow">
+                <h4 className="text-sm font-medium text-text-secondary mb-2">
                   {t("invoices.shipTo", "Ship To")}
                 </h4>
-                <p className="text-sm text-gray-600 font-medium">{selectedCustomer.name || 'N/A'}</p>
+                <p className="text-sm text-text-secondary font-medium">{selectedCustomer.name || 'N/A'}</p>
                 {selectedCustomer.address && (
-                  <p className="text-sm text-gray-600">{selectedCustomer.address}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.address}</p>
                 )}
                 {selectedCustomer.contact && (
-                  <p className="text-sm text-gray-600">{selectedCustomer.contact}</p>
+                  <p className="text-sm text-text-secondary">{selectedCustomer.contact}</p>
                 )}
               </div>
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-md shadow-md hover:shadow-lg transition-shadow border border-blue-200">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-800">
+                  <h4 className="text-sm font-medium text-text-primary">
                     {t("invoices.customerBalance", "Customer Balance")}
                   </h4>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -548,21 +576,21 @@ const calculateItemDiscounts = () => {
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t("invoices.creditLimit", "Credit Limit")}:</span>
+                    <span className="text-sm text-text-secondary">{t("invoices.creditLimit", "Credit Limit")}:</span>
                     <span className="text-sm font-medium text-blue-600">
                       {(selectedCustomer.credit_limit !== undefined ? parseFloat(selectedCustomer.credit_limit) : 0).toFixed(2)} QAR
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">{t("invoices.currentBalance", "Current Balance")}:</span>
+                    <span className="text-sm text-text-secondary">{t("invoices.currentBalance", "Current Balance")}:</span>
                     <span className={`text-sm font-medium ${selectedCustomer.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
                       {(selectedCustomer.balance !== undefined ? parseFloat(selectedCustomer.balance) : 0).toFixed(2)} QAR
                     </span>
                   </div>
-                  <div className="flex justify-between border-t border-gray-200 pt-1 mt-1">
-                    <span className="text-sm font-medium text-gray-700">{t("invoices.availableBalance", "Available Balance")}:</span>
+                  <div className="flex justify-between border-t border-theme-border pt-1 mt-1">
+                    <span className="text-sm font-medium text-text-secondary">{t("invoices.availableBalance", "Available Balance")}:</span>
                     <span className="text-sm font-bold text-green-600">
-                      {((selectedCustomer.credit_limit !== undefined ? parseFloat(selectedCustomer.credit_limit) : 0) - 
+                      {((selectedCustomer.credit_limit !== undefined ? parseFloat(selectedCustomer.credit_limit) : 0) -
                         (selectedCustomer.balance !== undefined ? parseFloat(selectedCustomer.balance) : 0)).toFixed(2)} QAR
                     </span>
                   </div>
@@ -589,7 +617,7 @@ const calculateItemDiscounts = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.invoiceNumber", "Invoice Number")}
               </label>
               <input
@@ -602,7 +630,7 @@ const calculateItemDiscounts = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.invoiceDate", "Invoice Date")}
               </label>
               <input
@@ -615,7 +643,7 @@ const calculateItemDiscounts = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.dueDate", "Due Date")}
               </label>
               <input
@@ -637,7 +665,7 @@ const calculateItemDiscounts = () => {
                 onChange={handleInputChange}
                 className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700">
+              <span className="ml-2 text-sm text-text-secondary">
                 {t(
                   "invoices.preventReminders",
                   "Prevent sending overdue reminders",
@@ -654,7 +682,7 @@ const calculateItemDiscounts = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.allowedPaymentModes", "Allowed Payment Modes")}
               </label>
               <select
@@ -685,7 +713,7 @@ const calculateItemDiscounts = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.currency", "Currency")}
               </label>
               <select
@@ -699,12 +727,12 @@ const calculateItemDiscounts = () => {
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-text-secondary mt-1">
                 {t("invoices.currencyNote", "Automatically set to QAR")}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.saleAgent", "Sale Agent")}
               </label>
               <select
@@ -724,7 +752,7 @@ const calculateItemDiscounts = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.discountType", "Discount Type")}
               </label>
               <div className="flex items-center space-x-4">
@@ -760,7 +788,7 @@ const calculateItemDiscounts = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.adminNote", "Admin Note")}
               </label>
               <textarea
@@ -786,55 +814,71 @@ const calculateItemDiscounts = () => {
             </svg>
             {t("invoices.items", "Itemized Billing")}
           </h3>
-          <div className="overflow-x-auto bg-white rounded-lg shadow-sm">
+          <div className="overflow-x-auto bg-card rounded-lg shadow-sm">
             <table className="w-full">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <tr className="bg-background">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("invoices.item", "Item")}
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("invoices.description", "Description")}
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("invoices.quantity", "Quantity")}
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("invoices.rate", "Rate")}
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("invoices.discount", "Discount")}
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("invoices.amount", "Amount")}
                   </th>
-                  <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-2 text-center text-xs font-medium text-text-secondary uppercase tracking-wider">
                     {t("common.actions", "Actions")}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {formData.items.map((item, index) => (
-                  <tr key={index} className="border-t border-gray-200">
+                  <tr key={index} className="border-t border-theme-border">
                     <td className="px-4 py-2">
-                      <select
-                        value={item.product_id}
-                        onChange={async (e) =>
-                          await handleItemChange(index, "product_id", e.target.value)
-                        }
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                        disabled={loadingProducts}
-                        required
-                      >
-                        <option value="">
-                          {t("common.select", "Select...")}
-                        </option>
-                        {products.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name_en} - {product.name_ar || product.name_en}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={productSearch}
+                          onChange={(e) => setProductSearch(e.target.value)}
+                          placeholder="Search products..."
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 mb-2"
+                        />
+                        <select
+                          value={item.product_id}
+                          onChange={async (e) => {
+                            await handleItemChange(index, "product_id", e.target.value);
+                            setProductSearch(''); // Clear search after selection
+                          }}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+                          disabled={loadingProducts}
+                          required
+                        >
+                          <option value="">
+                            {t("common.select", "Select...")}
                           </option>
-                        ))}
-                      </select>
+                          {products.map((product) => (
+                            <option key={product.id} value={product.id}>
+                              {product.name_en} - {product.name_ar || product.name_en} (QAR {product.price_per_unit})
+                            </option>
+                          ))}
+                        </select>
+                        {loadingProducts && (
+                          <div className="absolute inset-0 bg-card bg-opacity-70 flex items-center justify-center rounded-md">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                          </div>
+                        )}
+
+                      </div>
                     </td>
                     <td className="px-4 py-2">
                       <input
@@ -871,7 +915,7 @@ const calculateItemDiscounts = () => {
                           handleItemChange(index, "rate", e.target.value)
                         }
                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-                       
+
                         step="1"
                         required
                       />
@@ -891,7 +935,7 @@ const calculateItemDiscounts = () => {
                       <input
                         type="number"
                         value={item.amount}
-                        className="w-full p-2 bg-gray-50 border border-gray-300 rounded-md"
+                        className="w-full p-2 bg-background border border-gray-300 rounded-md"
                         readOnly
                       />
                     </td>
@@ -930,7 +974,7 @@ const calculateItemDiscounts = () => {
           <div className="flex flex-col items-end">
             <div className="w-full md:w-1/3 space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-text-secondary">
                   {t("invoices.subtotal", "Subtotal")}:
                 </span>
                 <span className="text-sm font-medium">
@@ -938,7 +982,7 @@ const calculateItemDiscounts = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-text-secondary">
                   {t("invoices.itemDiscounts", "Item Discounts")}:
                 </span>
                 <span className="text-sm font-medium">
@@ -946,14 +990,14 @@ const calculateItemDiscounts = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-text-secondary">
                   {t("invoices.invoiceDiscount", "Invoice Discount")}:
                 </span>
                 <span className="text-sm font-medium">
                   {formData.currency} {calculateInvoiceDiscount().toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-gray-200">
+              <div className="flex justify-between pt-2 border-t border-theme-border">
                 <span className="text-base font-medium">
                   {t("invoices.totalDiscount", "Total Discount")}:
                 </span>
@@ -961,7 +1005,7 @@ const calculateItemDiscounts = () => {
                   {formData.currency} {calculateTotalDiscount().toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-gray-200">
+              <div className="flex justify-between pt-2 border-t border-theme-border">
                 <span className="text-base font-medium">
                   {t("invoices.total", "Total")}:
                 </span>
@@ -980,7 +1024,7 @@ const calculateItemDiscounts = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.clientNote", "Client Note")}
               </label>
               <textarea
@@ -996,7 +1040,7 @@ const calculateItemDiscounts = () => {
               ></textarea>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-text-secondary mb-1">
                 {t("invoices.terms", "Terms & Conditions")}
               </label>
               <textarea

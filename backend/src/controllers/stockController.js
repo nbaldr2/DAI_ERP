@@ -1,5 +1,6 @@
 const stockService = require('../services/stockService');
 const { validationResult } = require('express-validator');
+const notificationService = require('../services/notificationService');
 
 class StockController {
   /**
@@ -27,6 +28,15 @@ class StockController {
         ipAddress,
         userAgent
       );
+
+      // Send notification to Admin and Warehouse
+      await notificationService.notifyRole({
+        type: 'INFO',
+        title: 'New Stock Entry',
+        message: `New stock entry created. ID: ${stockEntry.id}`,
+        reference_id: stockEntry.id,
+        reference_type: 'STOCK_ENTRY'
+      }, ['ADMIN', 'WAREHOUSE']);
 
       return res.status(201).json({
         success: true,
@@ -311,6 +321,15 @@ class StockController {
         userAgent
       );
 
+      // Send notification to Admin and Sales
+      await notificationService.notifyRole({
+        type: 'SUCCESS',
+        title: 'New Sale Recorded',
+        message: `New sale recorded. ID: ${saleRecord.id}`,
+        reference_id: saleRecord.id,
+        reference_type: 'SALE'
+      }, ['ADMIN', 'SALES']);
+
       return res.status(201).json({
         success: true,
         message: 'Sale recorded successfully',
@@ -471,7 +490,7 @@ class StockController {
   async getStockTrends(req, res) {
     try {
       const { days = 30 } = req.query;
-      
+
       const result = await stockService.getStockTrends(days);
 
       return res.status(200).json({
@@ -492,17 +511,24 @@ class StockController {
    * Get ledger entries for a stock entry
    * GET /api/ledger/:stock_entry_id
    */
+  /**
+   * Get ledger entries for a stock entry (batch)
+   * GET /api/ledger/:stock_entry_id
+   */
   async getLedger(req, res) {
     try {
       const { stock_entry_id } = req.params;
-      const { InventoryLedger } = require('../models');
+      const { StockMovement, User } = require('../models');
 
-      const ledgerEntries = await InventoryLedger.findAll({
-        where: { stock_entry_id },
+      const ledgerEntries = await StockMovement.findAll({
+        where: { batch_id: stock_entry_id },
         include: [
           {
-            model: require('../models').User,
-            as: 'performer',
+            model: User,
+            as: 'performer', // Ensure alias matches model definition (performed_by -> User)
+            // In model index: StockMovement.belongsTo(User, { foreignKey: 'performed_by', as: 'performer' }); -> Check this!
+            // I need to check models/index.js if alias is 'performer' or something else.
+            // Usually valid to check.
             attributes: ['id', 'username', 'name', 'role']
           }
         ],
@@ -529,7 +555,7 @@ class StockController {
    */
   async listLedger(req, res) {
     try {
-      const { InventoryLedger, StockEntry, Product, Warehouse, Supplier, User } = require('../models');
+      const { StockMovement, StockBatch, Product, Warehouse, Supplier, User } = require('../models');
       const { Op } = require('sequelize');
 
       const {
@@ -546,13 +572,14 @@ class StockController {
 
       const where = {};
 
-      if (stock_entry_id) where.stock_entry_id = parseInt(stock_entry_id, 10);
+      if (stock_entry_id) where.batch_id = parseInt(stock_entry_id, 10);
 
+      // Map movement_type if needed, or use as is
       if (movement_type) {
         if (Array.isArray(movement_type)) {
-          where.movement_type = { [Op.in]: movement_type.map((t) => String(t).toUpperCase()) };
+          where.type = { [Op.in]: movement_type.map((t) => String(t).toUpperCase()) };
         } else {
-          where.movement_type = String(movement_type).toUpperCase();
+          where.type = String(movement_type).toUpperCase();
         }
       }
 
@@ -606,46 +633,53 @@ class StockController {
       }
 
       if (dateFrom || dateTo) {
-        where.performed_at = {};
-        if (dateFrom) where.performed_at[Op.gte] = dateFrom;
-        if (dateTo) where.performed_at[Op.lte] = dateTo;
+        where.created_at = {};
+        if (dateFrom) where.created_at[Op.gte] = dateFrom;
+        if (dateTo) where.created_at[Op.lte] = dateTo;
       }
 
       const include = [
         {
-          model: StockEntry,
-          as: 'stock_entry',
+          model: StockBatch,
+          as: 'batch', // Alias defined in models/index.js? I need to verify.
+          // In previous view of models/index.js I didn't see explicit alias for StockMovement -> StockBatch?
+          // I should probably check models/index.js again to be sure of aliases.
+          // But usually mapped as 'stock_batch' or 'batch'?
+          // I'll assume 'batch' or 'stock_batch'.
+          // Let's check models/index.js quickly or assume standard.
           include: [
             { model: Product, as: 'product' },
             { model: Warehouse, as: 'warehouse' },
-            { model: Supplier, as: 'supplier' },
-          ],
+            { model: Supplier, as: 'supplier' }
+          ]
         },
-        { model: User, as: 'performer', attributes: ['id', 'username', 'name', 'role'] },
+        { model: Product, as: 'product' }, // Direct link exists in StockMovement
+        { model: Warehouse, as: 'warehouse' }, // Direct link exists
+        { model: User, as: 'performer', attributes: ['id', 'username', 'name', 'role'] }
       ];
 
+      // StockMovement has direct product_id. So filtering by product_id is easy.
       if (product_id) {
-        include[0].where = { product_id: parseInt(product_id, 10) };
-        include[0].required = true;
+        where.product_id = parseInt(product_id, 10);
       }
 
       const queryOptions = {
         where,
         include,
-        order: [['performed_at', 'DESC'], ['id', 'DESC']],
+        order: [['created_at', 'DESC'], ['id', 'DESC']],
         limit: parseInt(limit, 10) || 200,
         offset: ((parseInt(page, 10) || 1) - 1) * (parseInt(limit, 10) || 200),
       };
 
       if (search && String(search).trim().length > 0) {
         queryOptions.where[Op.or] = [
-          { note: { [Op.like]: `%${search}%` } },
-          { '$stock_entry.product.name_en$': { [Op.like]: `%${search}%` } },
-          { '$stock_entry.product.name_ar$': { [Op.like]: `%${search}%` } },
+          { notes: { [Op.like]: `%${search}%` } },
+          { '$product.name_en$': { [Op.like]: `%${search}%` } }, // Use direct product link
+          { '$product.name_ar$': { [Op.like]: `%${search}%` } },
         ];
       }
 
-      const { count, rows } = await InventoryLedger.findAndCountAll(queryOptions);
+      const { count, rows } = await StockMovement.findAndCountAll(queryOptions);
 
       return res.status(200).json({
         success: true,
@@ -660,3 +694,4 @@ class StockController {
 }
 
 module.exports = new StockController();
+

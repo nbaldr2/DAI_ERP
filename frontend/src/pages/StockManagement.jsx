@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,114 +17,62 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import { useStock, useStockLedger, useStockMutation } from '../hooks/queries/useStock';
+import debounce from 'lodash.debounce';
 
 const StockManagement = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [stockItems, setStockItems] = useState([]);
+
+  // Ledger state for params
+  const [ledgerSearchTerm, setLedgerSearchTerm] = useState('');
+  // Debounced ledger search handler
+  const debouncedLedgerSearch = useMemo(
+    () => debounce((value) => {
+      setLedgerSearchTerm(value);
+    }, 500),
+    []
+  );
+
+  const handleLedgerSearchChange = (e) => {
+    debouncedLedgerSearch(e.target.value);
+  };
+  const [ledgerDateRange, setLedgerDateRange] = useState('all');
+  const [ledgerStartDate, setLedgerStartDate] = useState('');
+  const [ledgerEndDate, setLedgerEndDate] = useState('');
+
+  // Stock Query
+  const { data: stockResponse, isLoading: stockLoading } = useStock();
+  const stockItems = stockResponse?.data || [];
+
+  // Stock Mutations
+  const { deleteStock } = useStockMutation();
+
+  // Ledger QueryParams
+  const ledgerParams = useMemo(() => {
+    const params = {};
+    if (ledgerDateRange && ledgerDateRange !== 'all') params.date_range = ledgerDateRange;
+    if (ledgerStartDate) params.start_date = ledgerStartDate;
+    if (ledgerEndDate) params.end_date = ledgerEndDate;
+    if (ledgerSearchTerm) params.search = ledgerSearchTerm;
+    return params;
+  }, [ledgerDateRange, ledgerStartDate, ledgerEndDate, ledgerSearchTerm]);
+
+  const { data: ledgerResponse, isLoading: ledgerLoading } = useStockLedger(ledgerParams);
+  const ledgerRecords = ledgerResponse?.data || [];
+
+  // Local state for stock filtering/sorting
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortField, setSortField] = useState('name');
   const [sortDirection, setSortDirection] = useState('asc');
 
-  // Ledger listing state
-  const [ledgerLoading, setLedgerLoading] = useState(false);
-  const [ledgerRecords, setLedgerRecords] = useState([]);
-  const [filteredLedgerRecords, setFilteredLedgerRecords] = useState([]);
-  const [ledgerSearchTerm, setLedgerSearchTerm] = useState('');
-  const [ledgerDateRange, setLedgerDateRange] = useState('all');
-  const [ledgerStartDate, setLedgerStartDate] = useState('');
-  const [ledgerEndDate, setLedgerEndDate] = useState('');
-
-  // Mock data for development
-  const mockStockData = [
-    {
-      id: 1,
-      name: 'Premium Dates - Medjool',
-      sku: 'DT-MDJ-001',
-      category: 'Dates',
-      quantity: 150,
-      unit: 'kg',
-      minStock: 50,
-      maxStock: 500,
-      costPrice: 25.50,
-      sellingPrice: 45.00,
-      supplier: 'Al Khaleej Dates Co.',
-      warehouse: 'Main Warehouse',
-      lastUpdated: '2024-01-15T10:30:00Z',
-      status: 'in_stock'
-    },
-    {
-      id: 2,
-      name: 'Organic Almonds',
-      sku: 'NT-ALM-002',
-      category: 'Nuts',
-      quantity: 25,
-      unit: 'kg',
-      minStock: 30,
-      maxStock: 200,
-      costPrice: 35.00,
-      sellingPrice: 55.00,
-      supplier: 'Organic Farms Ltd.',
-      warehouse: 'Main Warehouse',
-      lastUpdated: '2024-01-14T15:45:00Z',
-      status: 'low_stock'
-    },
-    {
-      id: 3,
-      name: 'Basmati Rice - Premium',
-      sku: 'RC-BSM-003',
-      category: 'Grains',
-      quantity: 0,
-      unit: 'kg',
-      minStock: 100,
-      maxStock: 1000,
-      costPrice: 12.50,
-      sellingPrice: 18.00,
-      supplier: 'Indian Grains Export',
-      warehouse: 'Secondary Warehouse',
-      lastUpdated: '2024-01-12T09:15:00Z',
-      status: 'out_of_stock'
-    }
-  ];
-
+  // Filter and Sort Stock Items
   useEffect(() => {
-    fetchStockData();
-  }, []);
+    if (!stockItems) return;
 
-  useEffect(() => {
-    fetchLedgerData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    filterAndSortItems();
-  }, [stockItems, searchTerm, filterStatus, sortField, sortDirection]);
-
-  useEffect(() => {
-    filterLedgerRecords();
-  }, [ledgerRecords, ledgerSearchTerm, ledgerDateRange, ledgerStartDate, ledgerEndDate]);
-
-  const fetchStockData = async () => {
-    try {
-      setLoading(true);
-      const response = await api.stock.list();
-      setStockItems(response.data.data || []);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching stock data:', error);
-      toast.error('Failed to fetch stock data');
-      // Fallback to mock data if API fails
-      setStockItems(mockStockData);
-      setLoading(false);
-    }
-  };
-
-  const filterAndSortItems = () => {
     let filtered = [...stockItems];
 
     // Apply search filter
@@ -159,66 +107,10 @@ const StockManagement = () => {
     });
 
     setFilteredItems(filtered);
-  };
+  }, [stockItems, searchTerm, filterStatus, sortField, sortDirection]);
 
-  const fetchLedgerData = async () => {
-    try {
-      setLedgerLoading(true);
-      const params = {};
-      if (ledgerDateRange && ledgerDateRange !== 'all') params.date_range = ledgerDateRange;
-      if (ledgerStartDate) params.start_date = ledgerStartDate;
-      if (ledgerEndDate) params.end_date = ledgerEndDate;
-      if (ledgerSearchTerm) params.search = ledgerSearchTerm;
 
-      const response = await api.stock.ledgerList(params);
-      const data = response.data?.data || [];
-      setLedgerRecords(data);
-    } catch (error) {
-      console.error('Error fetching ledger data:', error);
-      toast.error('Failed to fetch inventory ledger');
-      setLedgerRecords([]);
-    } finally {
-      setLedgerLoading(false);
-    }
-  };
 
-  const filterLedgerRecords = () => {
-    let filtered = [...ledgerRecords];
-
-    // Local search on note and product
-    if (ledgerSearchTerm) {
-      const term = ledgerSearchTerm.toLowerCase();
-      filtered = filtered.filter((entry) => {
-        const productName = entry.stock_entry?.product?.name_en || entry.stock_entry?.product?.name_ar || '';
-        const note = entry.note || '';
-        const batch = entry.stock_entry?.batch_number || '';
-        return (
-          productName.toLowerCase().includes(term) ||
-          note.toLowerCase().includes(term) ||
-          batch.toLowerCase().includes(term)
-        );
-      });
-    }
-
-    // Local date range filter if custom range is set
-    const parseDate = (d) => (d ? new Date(d) : null);
-    const start = ledgerStartDate ? parseDate(ledgerStartDate) : null;
-    const end = ledgerEndDate ? parseDate(ledgerEndDate) : null;
-    if (start || end) {
-      filtered = filtered.filter((entry) => {
-        const performed = new Date(entry.performed_at);
-        if (start && performed < start) return false;
-        if (end) {
-          const endOfDay = new Date(end);
-          endOfDay.setHours(23, 59, 59, 999);
-          if (performed > endOfDay) return false;
-        }
-        return true;
-      });
-    }
-
-    setFilteredLedgerRecords(filtered);
-  };
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -238,7 +130,7 @@ const StockManagement = () => {
       case 'out_of_stock':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-card-hover text-text-primary';
     }
   };
 
@@ -255,7 +147,7 @@ const StockManagement = () => {
     }
   };
 
-  if (loading) {
+  if (stockLoading) {
     return <LoadingSpinner fullScreen message="Loading stock data..." />;
   }
 
@@ -264,8 +156,8 @@ const StockManagement = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Stock Management</h1>
-          <p className="text-gray-600 mt-1">Manage your inventory and stock levels</p>
+          <h1 className="text-2xl font-bold text-text-primary">Stock Management</h1>
+          <p className="text-text-secondary mt-1">Manage your inventory and stock levels</p>
         </div>
         {hasPermission('stock:create') && (
           <button
@@ -280,54 +172,54 @@ const StockManagement = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">{stockItems.length}</p>
+              <p className="text-sm font-medium text-text-secondary">Total Items</p>
+              <p className="text-2xl font-bold text-text-primary">{stockItems.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <TrendingUp className="w-6 h-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">In Stock</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-secondary">In Stock</p>
+              <p className="text-2xl font-bold text-text-primary">
                 {stockItems.filter(item => item.status === 'in_stock').length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <AlertTriangle className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Low Stock</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-secondary">Low Stock</p>
+              <p className="text-2xl font-bold text-text-primary">
                 {stockItems.filter(item => item.status === 'low_stock').length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-red-100 rounded-lg">
               <TrendingDown className="w-6 h-6 text-red-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-secondary">Out of Stock</p>
+              <p className="text-2xl font-bold text-text-primary">
                 {stockItems.filter(item => item.status === 'out_of_stock').length}
               </p>
             </div>
@@ -336,10 +228,10 @@ const StockManagement = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="bg-card rounded-lg p-6 shadow-sm border">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               placeholder="Search by name, SKU, or category..."
@@ -365,13 +257,13 @@ const StockManagement = () => {
       </div>
 
       {/* Stock Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-theme-border">
+            <thead className="bg-background">
               <tr>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider cursor-pointer hover:bg-card-hover"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -380,7 +272,7 @@ const StockManagement = () => {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider cursor-pointer hover:bg-card-hover"
                   onClick={() => handleSort('quantity')}
                 >
                   <div className="flex items-center">
@@ -388,35 +280,35 @@ const StockManagement = () => {
                     <ArrowUpDown className="w-4 h-4 ml-1" />
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Supplier
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-card divide-y divide-theme-border">
               {filteredItems.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
+                <tr key={item.id} className="hover:bg-card-hover">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                      <div className="text-sm text-gray-500">SKU: {item.sku}</div>
-                      <div className="text-xs text-gray-400">{item.category}</div>
+                      <div className="text-sm font-medium text-text-primary">{item.name}</div>
+                      <div className="text-sm text-text-secondary">SKU: {item.sku}</div>
+                      <div className="text-xs text-text-secondary">{item.category}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                    <div className="text-sm text-text-primary">
                       {item.quantity} {item.unit}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-secondary">
                       Min: {item.minStock} | Max: {item.maxStock}
                     </div>
                   </td>
@@ -426,13 +318,13 @@ const StockManagement = () => {
                       <span className="ml-1 capitalize">{item.status.replace('_', ' ')}</span>
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                     <div>Cost: ${item.costPrice}</div>
                     <div className="text-green-600">Sale: ${item.sellingPrice}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.supplier?.name || '—'}</div>
-                    <div className="text-xs text-gray-500">{item.warehouse?.name || '—'}</div>
+                    <div className="text-sm text-text-primary">{item.supplier?.name || '—'}</div>
+                    <div className="text-xs text-text-secondary">{item.warehouse?.name || '—'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
@@ -454,16 +346,9 @@ const StockManagement = () => {
                       )}
                       {hasPermission('stock:delete') && (
                         <button
-                          onClick={async () => {
+                          onClick={() => {
                             if (window.confirm('Are you sure you want to delete this item?')) {
-                              try {
-                                await api.stock.delete(item.id);
-                                toast.success('Item deleted successfully');
-                                fetchStockData(); // Refresh the list
-                              } catch (error) {
-                                toast.error('Failed to delete item');
-                                console.error('Delete error:', error);
-                              }
+                              deleteStock(item.id);
                             }
                           }}
                           className="text-red-600 hover:text-red-700 p-1 rounded"
@@ -482,9 +367,9 @@ const StockManagement = () => {
 
         {filteredItems.length === 0 && (
           <div className="text-center py-12">
-            <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No stock items found</h3>
-            <p className="text-gray-500">
+            <Package className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-text-primary mb-2">No stock items found</h3>
+            <p className="text-text-secondary">
               {searchTerm || filterStatus !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Get started by adding your first stock item.'
@@ -495,15 +380,14 @@ const StockManagement = () => {
       </div>
 
       {/* Inventory Ledger */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="bg-card rounded-lg p-6 shadow-sm border">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Inventory Ledger</h2>
-            <p className="text-sm text-gray-600">View stock movements with date filters</p>
+            <h2 className="text-lg font-semibold text-text-primary">Inventory Ledger</h2>
+            <p className="text-sm text-text-secondary">View stock movements with date filters</p>
           </div>
           <div className="flex gap-2">
             <button
-              onClick={fetchLedgerData}
               className="inline-flex items-center px-3 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
             >
               <Filter className="w-4 h-4 mr-2" /> Apply Filters
@@ -514,7 +398,7 @@ const StockManagement = () => {
         {/* Ledger Filters */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               placeholder="Search product, note, batch..."
@@ -558,52 +442,52 @@ const StockManagement = () => {
         </div>
 
         {/* Ledger Table */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
           {ledgerLoading ? (
             <LoadingSpinner message="Loading ledger..." />
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-theme-border">
+                <thead className="bg-background">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Movement</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance After</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performed By</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Product</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Movement</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Qty</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Balance After</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Performed By</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Note</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredLedgerRecords.map((entry) => (
-                    <tr key={entry.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <tbody className="bg-card divide-y divide-theme-border">
+                  {ledgerRecords.map((entry) => (
+                    <tr key={entry.id} className="hover:bg-card-hover">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {new Date(entry.performed_at).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {entry.stock_entry?.product?.name_en || entry.stock_entry?.product?.name_ar || '—'}
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-text-secondary">
                           Supplier: {entry.stock_entry?.supplier?.name || '—'}
                           <br />
                           Warehouse: {entry.stock_entry?.warehouse?.name || '—'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-card-hover text-text-primary">
                           {entry.movement_type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {entry.qty}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {entry.balance_after}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {entry.performer?.name || entry.performer?.username || 'System'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {entry.note || '—'}
                       </td>
                     </tr>
@@ -613,9 +497,9 @@ const StockManagement = () => {
             </div>
           )}
 
-          {!ledgerLoading && filteredLedgerRecords.length === 0 && (
+          {!ledgerLoading && ledgerRecords.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-gray-500">No ledger entries match the current filters.</p>
+              <p className="text-text-secondary">No ledger entries match the current filters.</p>
             </div>
           )}
         </div>

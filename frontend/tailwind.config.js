@@ -67,6 +67,13 @@ export default {
           800: '#166534',
           900: '#14532d',
         },
+        background: 'var(--bg-primary)',
+        'bg-secondary': 'var(--bg-secondary)',
+        card: 'var(--card-bg)',
+        'card-hover': 'var(--card-hover)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'theme-border': 'var(--border-color)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

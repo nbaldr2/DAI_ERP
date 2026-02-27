@@ -270,11 +270,11 @@ const Settings = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <SettingsIcon className="w-6 h-6 text-green-600" />
             {t('settings.title', 'Settings')}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-text-secondary mt-1">
             {t('settings.subtitle', 'Manage your account settings and preferences')}
           </p>
         </div>
@@ -293,7 +293,7 @@ const Settings = () => {
                     className={`w-full flex items-center gap-3 px-3 py-2 text-left rounded-lg transition-colors ${
                       activeTab === tab.id
                         ? 'bg-green-100 text-green-700'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        : 'text-text-secondary hover:bg-card-hover'
                     }`}
                     onClick={() => setActiveTab(tab.id)}
                   >
@@ -311,11 +311,11 @@ const Settings = () => {
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <Card>
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
+              <div className="p-6 border-b border-theme-border">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('settings.profile.title', 'Profile Information')}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-text-secondary text-sm mt-1">
                   {t('settings.profile.subtitle', 'Update your account profile information')}
                 </p>
               </div>
@@ -323,7 +323,7 @@ const Settings = () => {
                 <div className="flex items-center gap-6">
                   <div className="relative">
                     <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User className="w-8 h-8 text-gray-400" />
+                      <User className="w-8 h-8 text-text-secondary" />
                     </div>
                     <button
                       type="button"
@@ -334,34 +334,34 @@ const Settings = () => {
                     </button>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{user?.name}</h3>
-                    <p className="text-gray-600">{user?.role}</p>
-                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <h3 className="text-lg font-medium text-text-primary">{user?.name}</h3>
+                    <p className="text-text-secondary">{user?.role}</p>
+                    <p className="text-sm text-text-secondary">{user?.email}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.profile.full_name', 'Full Name')}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={profileData.name}
                       onChange={(e) => setProfileData({...profileData, name: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.profile.email', 'Email Address')}
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                       <input
                         type="email"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full pl-10 pr-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         value={profileData.email}
                         onChange={(e) => setProfileData({...profileData, email: e.target.value})}
                       />
@@ -369,14 +369,14 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.profile.phone', 'Phone Number')}
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                       <input
                         type="tel"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full pl-10 pr-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         value={profileData.phone}
                         onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
                       />
@@ -384,14 +384,14 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.profile.department', 'Department')}
                     </label>
                     <div className="relative">
-                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                       <input
                         type="text"
-                        className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full pl-10 pr-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         value={profileData.department}
                         onChange={(e) => setProfileData({...profileData, department: e.target.value})}
                       />
@@ -400,14 +400,14 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.profile.address', 'Address')}
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+                    <MapPin className="absolute left-3 top-3 text-text-secondary w-4 h-4" />
                     <textarea
                       rows={3}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full pl-10 pr-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={profileData.address}
                       onChange={(e) => setProfileData({...profileData, address: e.target.value})}
                     />
@@ -427,18 +427,18 @@ const Settings = () => {
           {/* Preferences Tab */}
           {activeTab === 'preferences' && (
             <Card>
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
+              <div className="p-6 border-b border-theme-border">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('settings.preferences.title', 'Preferences')}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-text-secondary text-sm mt-1">
                   {t('settings.preferences.subtitle', 'Customize your application experience')}
                 </p>
               </div>
               <div className="p-6 space-y-6">
                 {/* Language */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.preferences.language', 'Language')}
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -449,7 +449,7 @@ const Settings = () => {
                         className={`flex items-center gap-3 p-3 border rounded-lg text-left transition-colors ${
                           preferences.language === lang.code
                             ? 'border-green-500 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-theme-border hover:border-gray-300'
                         }`}
                         onClick={() => setPreferences({...preferences, language: lang.code})}
                       >
@@ -470,7 +470,7 @@ const Settings = () => {
 
                 {/* Theme */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.preferences.theme', 'Theme')}
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -483,7 +483,7 @@ const Settings = () => {
                           className={`flex flex-col items-center gap-2 p-3 border rounded-lg transition-colors ${
                             preferences.theme === themeOption.id
                               ? 'border-green-500 bg-green-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              : 'border-theme-border hover:border-gray-300'
                           }`}
                           onClick={() => setPreferences({...preferences, theme: themeOption.id})}
                         >
@@ -501,11 +501,11 @@ const Settings = () => {
                 {/* Other Preferences */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.preferences.date_format', 'Date Format')}
                     </label>
                     <select
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={preferences.dateFormat}
                       onChange={(e) => setPreferences({...preferences, dateFormat: e.target.value})}
                     >
@@ -516,11 +516,11 @@ const Settings = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.preferences.timezone', 'Timezone')}
                     </label>
                     <select
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={preferences.timezone}
                       onChange={(e) => setPreferences({...preferences, timezone: e.target.value})}
                     >
@@ -544,11 +544,11 @@ const Settings = () => {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <Card>
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
+              <div className="p-6 border-b border-theme-border">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('settings.security.title', 'Security Settings')}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-text-secondary text-sm mt-1">
                   {t('settings.security.subtitle', 'Manage your account security')}
                 </p>
               </div>
@@ -566,21 +566,21 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.security.current_password', 'Current Password')}
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                     <input
                       type={showCurrentPassword ? 'text' : 'password'}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full pl-10 pr-10 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
                       required
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     >
                       {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -589,21 +589,21 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.security.new_password', 'New Password')}
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                     <input
                       type={showNewPassword ? 'text' : 'password'}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full pl-10 pr-10 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                       required
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
                       onClick={() => setShowNewPassword(!showNewPassword)}
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -612,21 +612,21 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.security.confirm_password', 'Confirm New Password')}
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
-                      className="w-full pl-10 pr-10 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full pl-10 pr-10 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                       required
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -647,11 +647,11 @@ const Settings = () => {
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <Card>
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
+              <div className="p-6 border-b border-theme-border">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('settings.notifications.title', 'Notification Settings')}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-text-secondary text-sm mt-1">
                   {t('settings.notifications.subtitle', 'Choose what notifications you want to receive')}
                 </p>
               </div>
@@ -659,10 +659,10 @@ const Settings = () => {
                 {Object.entries(preferences.notifications).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between py-2">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-text-secondary">
                         {t(`settings.notifications.${key}`, key.replace('_', ' ').toUpperCase())}
                       </label>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-text-secondary mt-1">
                         {t(`settings.notifications.${key}_desc`, `Enable ${key.replace('_', ' ')} notifications`)}
                       </p>
                     </div>
@@ -680,7 +680,7 @@ const Settings = () => {
                       })}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-card shadow ring-0 transition duration-200 ease-in-out ${
                           value ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
@@ -688,7 +688,7 @@ const Settings = () => {
                   </div>
                 ))}
 
-                <div className="flex justify-end pt-4 border-t border-gray-200">
+                <div className="flex justify-end pt-4 border-t border-theme-border">
                   <Button onClick={handlePreferencesUpdate} disabled={loading} className="flex items-center gap-2">
                     <Save className="w-4 h-4" />
                     {t('common.save_changes', 'Save Changes')}
@@ -701,96 +701,96 @@ const Settings = () => {
           {/* System Tab (Admin Only) */}
           {activeTab === 'system' && user?.role === 'ADMIN' && (
             <Card>
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
+              <div className="p-6 border-b border-theme-border">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {t('settings.system.title', 'System Settings')}
                 </h2>
-                <p className="text-gray-600 text-sm mt-1">
+                <p className="text-text-secondary text-sm mt-1">
                   {t('settings.system.subtitle', 'Configure system-wide settings')}
                 </p>
               </div>
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.company_name', 'Company Name')}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.company_name}
                       onChange={(e) => setSystemSettings({...systemSettings, company_name: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.company_email', 'Company Email')}
                     </label>
                     <input
                       type="email"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.company_email}
                       onChange={(e) => setSystemSettings({...systemSettings, company_email: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.company_phone', 'Company Phone')}
                     </label>
                     <input
                       type="tel"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.company_phone}
                       onChange={(e) => setSystemSettings({...systemSettings, company_phone: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.tax_rate', 'Tax Rate (%)')}
                     </label>
                     <input
                       type="number"
                       step="0.01"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.tax_rate}
                       onChange={(e) => setSystemSettings({...systemSettings, tax_rate: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.currency', 'Currency')}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.currency}
                       onChange={(e) => setSystemSettings({...systemSettings, currency: e.target.value})}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.cr_number', 'CR Number')}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.cr_number || ''}
                       onChange={(e) => setSystemSettings({...systemSettings, cr_number: e.target.value})}
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       {t('settings.system.logo_url', 'Logo URL')}
                     </label>
                     <input
                       type="url"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       value={systemSettings.logo_url || ''}
                       onChange={(e) => setSystemSettings({...systemSettings, logo_url: e.target.value})}
                     />
@@ -798,18 +798,18 @@ const Settings = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('settings.system.company_address', 'Company Address')}
                   </label>
                   <textarea
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     value={systemSettings.company_address}
                     onChange={(e) => setSystemSettings({...systemSettings, company_address: e.target.value})}
                   />
                 </div>
 
-                <div className="flex justify-end pt-4 border-t border-gray-200">
+                <div className="flex justify-end pt-4 border-t border-theme-border">
                   <Button onClick={handleSystemSettingsUpdate} disabled={loading} className="flex items-center gap-2">
                     <Save className="w-4 h-4" />
                     {t('common.save_changes', 'Save Changes')}

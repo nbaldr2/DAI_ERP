@@ -63,7 +63,7 @@ const WarehouseDetails = () => {
       case 'quarantine':
         return 'bg-yellow-100 text-yellow-800';
       case 'closed':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-card-hover text-text-primary';
       case 'received':
         return 'bg-blue-100 text-blue-800';
       case 'pending':
@@ -73,7 +73,7 @@ const WarehouseDetails = () => {
       case 'completed':
         return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-card-hover text-text-primary';
     }
   };
 
@@ -209,9 +209,9 @@ const WarehouseDetails = () => {
   if (!warehouse) {
     return (
       <div className="text-center py-12">
-        <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Warehouse not found</h3>
-        <p className="text-gray-500">
+        <Building className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-text-primary mb-2">Warehouse not found</h3>
+        <p className="text-text-secondary">
           The warehouse you are looking for does not exist.
         </p>
         <button 
@@ -235,47 +235,47 @@ const WarehouseDetails = () => {
           <ArrowLeft className="w-6 h-6" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{warehouse.name}</h1>
-          <p className="text-gray-600 mt-1">{warehouse.location || 'No location specified'}</p>
+          <h1 className="text-2xl font-bold text-text-primary">{warehouse.name}</h1>
+          <p className="text-text-secondary mt-1">{warehouse.location || 'No location specified'}</p>
         </div>
       </div>
 
       {/* Stats Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Package className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Products</p>
-              <p className="text-2xl font-bold text-gray-900">{stockEntries.length}</p>
+              <p className="text-sm font-medium text-text-secondary">Total Products</p>
+              <p className="text-2xl font-bold text-text-primary">{stockEntries.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <CheckCircle className="w-6 h-6 text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Available Items</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-secondary">Available Items</p>
+              <p className="text-2xl font-bold text-text-primary">
                 {stockEntries.filter(entry => entry.status === 'COMPLETED').length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg p-6 shadow-sm border">
+        <div className="bg-card rounded-lg p-6 shadow-sm border">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <AlertTriangle className="w-6 h-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Near Expiry</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-text-secondary">Near Expiry</p>
+              <p className="text-2xl font-bold text-text-primary">
                 {stockEntries.filter(entry => isNearExpiry(entry.expiry_date)).length}
               </p>
             </div>
@@ -284,18 +284,18 @@ const WarehouseDetails = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
+      <div className="bg-card rounded-lg shadow-sm border p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900"></h2>
+          <h2 className="text-lg font-semibold text-text-primary"></h2>
          </div>
         
  
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Search Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Search</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Product name..."
@@ -308,7 +308,7 @@ const WarehouseDetails = () => {
             
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Category</label>
               <select
                 value={filters.category}
                 onChange={(e) => handleFilterChange('category', e.target.value)}
@@ -323,7 +323,7 @@ const WarehouseDetails = () => {
             
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Status</label>
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -338,7 +338,7 @@ const WarehouseDetails = () => {
             
             {/* Date From Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Date From</label>
               <input
                 type="date"
                 value={filters.dateFrom}
@@ -349,7 +349,7 @@ const WarehouseDetails = () => {
             
             {/* Date To Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1">Date To</label>
               <input
                 type="date"
                 value={filters.dateTo}
@@ -363,7 +363,7 @@ const WarehouseDetails = () => {
         {/* Active Filters Display */}
         {(filters.searchTerm || filters.category || filters.status || filters.dateFrom || filters.dateTo) && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-600">Active filters:</span>
+            <span className="text-sm text-text-secondary">Active filters:</span>
             {filters.searchTerm && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 Search: {filters.searchTerm}
@@ -399,18 +399,18 @@ const WarehouseDetails = () => {
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
         <div className="p-6 border-b flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Products in Warehouse</h2>
-          <div className="text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-text-primary">Products in Warehouse</h2>
+          <div className="text-sm text-text-secondary">
             Showing {filteredStockEntries.length} of {stockEntries.length} products
           </div>
         </div>
         {filteredStockEntries.length === 0 ? (
           <div className="p-8 text-center">
             <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-500">
+            <h3 className="text-lg font-medium text-text-primary mb-2">No products found</h3>
+            <p className="text-text-secondary">
               {stockEntries.length === 0 
                 ? 'This warehouse does not have any products yet.' 
                 : 'No products match the current filters.'}
@@ -424,37 +424,37 @@ const WarehouseDetails = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-background">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purchase Order</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date In</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Pallets / <br />Weight (kg)</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Purchase Order</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Date In</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Expiry Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Pallets / <br />Weight (kg)</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-theme-border">
                 {filteredStockEntries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-gray-50">
+                  <tr key={entry.id} className="hover:bg-card-hover">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-text-primary">
                         {entry.product?.name_en && entry.product?.name_ar
                           ? `${entry.product.name_en} - ${entry.product.name_ar}`
                           : entry.product?.name_en || entry.product?.name_ar || 'Unknown Product'}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-text-secondary">
                         {entry.product?.origin ? `${entry.product.origin}` : ''}
                         {entry.product?.category ? ` - ${entry.product.category}` : ''}
                       </div>
                     </td>
                     
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                       {entry.product?.category || 'N/A'}
                     </td>
                     
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                       {entry.purchase ? (
                         <Link to={`/purchases/${entry.purchase.id}`} className="inline-flex items-center text-primary-600 hover:underline">
                           <FileText className="w-4 h-4 mr-1" />
@@ -464,9 +464,9 @@ const WarehouseDetails = () => {
                         'N/A'
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                       <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                        <Calendar className="w-4 h-4 text-text-secondary mr-1" />
                         {formatDate(entry.date_in)}
                       </div>
                     </td>
@@ -489,8 +489,8 @@ const WarehouseDetails = () => {
                         disabled={updatingStatus[entry.id]}
                         className={`px-2 py-1 rounded text-xs font-medium border ${
                           updatingStatus[entry.id] 
-                            ? 'bg-gray-100 cursor-not-allowed' 
-                            : 'bg-white cursor-pointer'
+                            ? 'bg-card-hover cursor-not-allowed' 
+                            : 'bg-card cursor-pointer'
                         } ${getStatusColor(entry.status)}`}
                       >
                         <option value="PENDING">PENDING</option>
@@ -499,7 +499,7 @@ const WarehouseDetails = () => {
                         <option value="COMPLETED">COMPLETED</option>
                       </select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary text-right">
                       {entry.pallets} / {parseFloat(entry.total_weight || 0).toFixed(2)}
                     </td>
                   </tr>

@@ -15,7 +15,7 @@ const Card = ({
   ...props
 }) => {
   const baseStyles = clsx(
-    'bg-white transition-all duration-200',
+    'bg-card transition-all duration-300 backdrop-blur-md',
     {
       'shadow-sm': shadow === 'sm',
       'shadow-md': shadow === 'md',
@@ -26,7 +26,7 @@ const Card = ({
       'rounded-xl': rounded === 'xl',
       'rounded-2xl': rounded === '2xl',
       'rounded-none': rounded === 'none',
-      'border border-gray-100': border,
+      'border border-theme-border': border,
       'p-6': padding,
       'hover:shadow-xl hover:-translate-y-1 cursor-pointer': hoverable,
     }
@@ -55,15 +55,15 @@ const Card = ({
   return (
     <div className={clsx(baseStyles, className)} {...props}>
       {(title || subtitle || action) && (
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-6 flex-shrink-0">
           <div className="flex-1">
             {title && (
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              <h3 className="text-lg font-semibold text-text-primary mb-1">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-secondary">
                 {subtitle}
               </p>
             )}
@@ -76,7 +76,7 @@ const Card = ({
         </div>
       )}
 
-      <div className="animate-fade-in">
+      <div className="animate-fade-in flex-1 flex flex-col min-h-0">
         {children}
       </div>
     </div>

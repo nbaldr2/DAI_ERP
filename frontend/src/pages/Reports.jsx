@@ -287,16 +287,16 @@ const Reports = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             {t('reports.title', 'Reports & Analytics')}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-text-secondary mt-1">
             {t('reports.subtitle', 'Business intelligence and performance metrics')}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <select
-            className="px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="px-3 py-2 border border-theme-border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
           >
@@ -317,7 +317,7 @@ const Reports = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-theme-border">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -327,7 +327,7 @@ const Reports = () => {
                 className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
                   activeTab === tab.id
                     ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-text-secondary hover:text-text-secondary hover:border-gray-300'
                 }`}
                 onClick={() => setActiveTab(tab.id)}
               >
@@ -347,8 +347,8 @@ const Reports = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Stock</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-sm font-medium text-text-secondary">Total Stock</p>
+                  <p className="text-2xl font-bold text-text-primary mt-1">
                     {stockSummary ? parseFloat(stockSummary.total_stock_kg).toLocaleString() : '0'} kg
                   </p>
                 </div>
@@ -361,8 +361,8 @@ const Reports = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-sm font-medium text-text-secondary">Total Revenue</p>
+                  <p className="text-2xl font-bold text-text-primary mt-1">
                     {(() => {
                       const val = invoiceRevenue?.total_net ?? invoiceRevenue?.total_revenue ?? salesRevenue?.total_revenue ?? 0;
                       return `QAR ${parseFloat(val || 0).toLocaleString()}`;
@@ -378,8 +378,8 @@ const Reports = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Waste</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-sm font-medium text-text-secondary">Total Waste</p>
+                  <p className="text-2xl font-bold text-text-primary mt-1">
                     {stockSummary ? parseFloat(stockSummary.total_waste_kg).toLocaleString() : '0'} kg
                   </p>
                 </div>
@@ -392,8 +392,8 @@ const Reports = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Near Expiry</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-sm font-medium text-text-secondary">Near Expiry</p>
+                  <p className="text-2xl font-bold text-text-primary mt-1">
                     {nearExpiry.length}
                   </p>
                 </div>
@@ -408,7 +408,7 @@ const Reports = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Stock Distribution</h3>
+                <h3 className="text-lg font-semibold text-text-primary">Stock Distribution</h3>
                 <Button
                   size="sm"
                   variant="outline"
@@ -426,7 +426,7 @@ const Reports = () => {
 
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Sales by Product</h3>
+                <h3 className="text-lg font-semibold text-text-primary">Sales by Product</h3>
                 <Button
                   size="sm"
                   variant="outline"
@@ -452,8 +452,8 @@ const Reports = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="p-6">
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
+                <p className="text-sm font-medium text-text-secondary">Total Sales</p>
+                <p className="text-3xl font-bold text-text-primary mt-2">
                   {salesRevenue?.total_sales ?? invoiceRevenue?.total_invoices ?? 0}
                 </p>
               </div>
@@ -461,7 +461,7 @@ const Reports = () => {
 
             <Card className="p-6">
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-sm font-medium text-text-secondary">Total Revenue</p>
                 <p className="text-3xl font-bold text-green-600 mt-2">
                   {(() => {
                     const val = salesRevenue?.total_revenue ?? invoiceRevenue?.total_net ?? invoiceRevenue?.total_revenue ?? 0;
@@ -473,7 +473,7 @@ const Reports = () => {
 
             <Card className="p-6">
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-600">Weight Sold</p>
+                <p className="text-sm font-medium text-text-secondary">Weight Sold</p>
                 <p className="text-3xl font-bold text-blue-600 mt-2">
                   {salesRevenue ? `${parseFloat(salesRevenue.total_weight_sold || 0).toLocaleString()} kg` : '-'}
                 </p>
@@ -483,29 +483,29 @@ const Reports = () => {
 
           {/* Top Customers */}
           <Card>
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Top Customers</h3>
+            <div className="p-6 border-b border-theme-border">
+              <h3 className="text-lg font-semibold text-text-primary">Top Customers</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-background">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sales Count</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Weight</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Revenue</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Customer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Sales Count</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Total Weight</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Total Revenue</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-card divide-y divide-theme-border">
                   {(salesRevenue?.by_customer || []).map((customer, index) => (
                     <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
                         {customer.customer_name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                         {customer.sales_count}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                         {parseFloat(customer.total_weight).toLocaleString()} kg
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
@@ -524,19 +524,19 @@ const Reports = () => {
       {activeTab === 'inventory' && (
         <div className="space-y-6">
           <Card>
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Current Stock Levels</h3>
+            <div className="p-6 border-b border-theme-border">
+              <h3 className="text-lg font-semibold text-text-primary">Current Stock Levels</h3>
             </div>
             <div className="p-6">
               {inventoryValuation && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Items</p>
-                      <p className="text-2xl font-bold text-gray-900">{inventoryValuation.total_items}</p>
+                      <p className="text-sm font-medium text-text-secondary">Total Items</p>
+                      <p className="text-2xl font-bold text-text-primary">{inventoryValuation.total_items}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Value</p>
+                      <p className="text-sm font-medium text-text-secondary">Total Value</p>
                       <p className="text-2xl font-bold text-green-600">
                         QAR {parseFloat(inventoryValuation.total_value).toLocaleString()}
                       </p>
@@ -555,8 +555,8 @@ const Reports = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="p-6">
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-600">Total Waste Records</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
+                <p className="text-sm font-medium text-text-secondary">Total Waste Records</p>
+                <p className="text-3xl font-bold text-text-primary mt-2">
                   {wasteAnalysis.total_waste_records}
                 </p>
               </div>
@@ -564,7 +564,7 @@ const Reports = () => {
 
             <Card className="p-6">
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-600">Total Waste Weight</p>
+                <p className="text-sm font-medium text-text-secondary">Total Waste Weight</p>
                 <p className="text-3xl font-bold text-red-600 mt-2">
                   {parseFloat(wasteAnalysis.total_waste_weight).toLocaleString()} kg
                 </p>
@@ -575,7 +575,7 @@ const Reports = () => {
           {wasteChartData && (
             <Card className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Waste by Product</h3>
+                <h3 className="text-lg font-semibold text-text-primary">Waste by Product</h3>
                 <Button
                   size="sm"
                   variant="outline"
@@ -596,43 +596,43 @@ const Reports = () => {
       {activeTab === 'alerts' && (
         <div className="space-y-6">
           <Card>
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <div className="p-6 border-b border-theme-border">
+              <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-500" />
                 Near Expiry Items
               </h3>
             </div>
             {nearExpiry.length === 0 ? (
               <div className="p-12 text-center">
-                <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No alerts</h3>
-                <p className="text-gray-600">All items are within safe expiry periods.</p>
+                <AlertTriangle className="w-12 h-12 text-text-secondary mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-text-primary mb-2">No alerts</h3>
+                <p className="text-text-secondary">All items are within safe expiry periods.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-background">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Warehouse</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available Qty</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expiry Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Days Left</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Product</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Warehouse</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Available Qty</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Expiry Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">Days Left</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-card divide-y divide-theme-border">
                     {nearExpiry.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <tr key={item.id} className="hover:bg-card-hover">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">
                           {item.product?.name_en} / {item.product?.name_ar}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                           {item.warehouse?.name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                           {item.available_qty} kg
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
                           {safeFormatDate(item.expiry_date)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -658,12 +658,12 @@ const Reports = () => {
       {activeTab === 'export' && (
         <div className="space-y-6">
           <Card>
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <div className="p-6 border-b border-theme-border">
+              <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                 <Database className="w-5 h-5 text-blue-500" />
                 {t('reports.export.title', 'Database Export')}
               </h3>
-              <p className="text-gray-600 mt-1">
+              <p className="text-text-secondary mt-1">
                 {t('reports.export.subtitle', 'Export database tables to CSV format')}
               </p>
             </div>
@@ -679,8 +679,8 @@ const Reports = () => {
                             <Icon className="w-5 h-5 text-blue-600" />
                           </div>
                           <div>
-                            <h4 className="font-medium text-gray-900">{table.name}</h4>
-                            <p className="text-sm text-gray-500">{table.id}</p>
+                            <h4 className="font-medium text-text-primary">{table.name}</h4>
+                            <p className="text-sm text-text-secondary">{table.id}</p>
                           </div>
                         </div>
                         <Button

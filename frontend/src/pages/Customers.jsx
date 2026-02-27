@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import apiService from '../services/api';
 import { toast } from 'react-hot-toast';
+import Swal from 'sweetalert2';
 
 const Customers = () => {
   const { t } = useTranslation();
@@ -109,29 +110,63 @@ const Customers = () => {
 
       if (editingCustomer) {
         await apiService.customers.update(editingCustomer.id, submitData);
-        toast.success('Customer updated successfully');
+        Swal.fire({
+          title: 'Success!',
+          text: 'Customer updated successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
       } else {
         await apiService.customers.create(submitData);
-        toast.success('Customer created successfully');
+        Swal.fire({
+          title: 'Success!',
+          text: 'Customer created successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
       }
       
       setShowModal(false);
       fetchCustomers(pagination.page, searchTerm, typeFilter);
     } catch (error) {
-      toast.error(editingCustomer ? 'Failed to update customer' : 'Failed to create customer');
+      Swal.fire({
+        title: 'Error!',
+        text: editingCustomer ? 'Failed to update customer' : 'Failed to create customer',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this customer?')) {
-      try {
-        await apiService.customers.delete(id);
-        toast.success('Customer deleted successfully');
-        fetchCustomers(pagination.page, searchTerm, typeFilter);
-      } catch (error) {
-        toast.error('Failed to delete customer');
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await apiService.customers.delete(id);
+          Swal.fire(
+            'Deleted!',
+            'The customer has been deleted.',
+            'success'
+          );
+          fetchCustomers(pagination.page, searchTerm, typeFilter);
+        } catch (error) {
+          Swal.fire(
+            'Error!',
+            'Failed to delete customer',
+            'error'
+          );
+        }
       }
-    }
+    });
   };
 
   if (loading) {
@@ -142,8 +177,8 @@ const Customers = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-gray-600 mt-1">Manage your customer relationships</p>
+          <h1 className="text-2xl font-bold text-text-primary">Customers</h1>
+          <p className="text-text-secondary mt-1">Manage your customer relationships</p>
         </div>
         {hasPermission('customers:create') && (
           <button 
@@ -157,11 +192,11 @@ const Customers = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-card rounded-lg shadow-sm border p-4">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
               <input
                 type="text"
                 placeholder="Search customers..."
@@ -192,7 +227,7 @@ const Customers = () => {
       </div>
 
       {/* Customers Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
             <LoadingSpinner />
@@ -200,50 +235,50 @@ const Customers = () => {
         ) : customers.length === 0 ? (
           <div className="p-8 text-center">
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
-            <p className="text-gray-500">Get started by adding your first customer.</p>
+            <h3 className="text-lg font-medium text-text-primary mb-2">No customers found</h3>
+            <p className="text-text-secondary">Get started by adding your first customer.</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-background">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.name", "Customer Name")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.contact", "Contact")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.type", "Type")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.creditLimit", "Credit Limit")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.balance", "Balance")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.availableCredit", "Available Credit")}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("customers.address", "Address")}
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                       {t("common.actions", "Actions")}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-card divide-y divide-theme-border">
                   {customers.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-gray-50">
+                    <tr key={customer.id} className="hover:bg-card-hover">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-text-primary">
                           {customer.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         {customer.contact || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -255,16 +290,16 @@ const Customers = () => {
                           {customer.type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <b className='text-gray-600'>{customer.credit_limit || '0.00'}</b>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
+                        <b className='text-text-secondary'>{customer.credit_limit || '0.00'}</b>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         <b className='text-red-600'>{customer.balance || '0.00'}</b>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                         <b className='text-green-600'>{((customer.credit_limit || 0) - (customer.balance || 0)).toFixed(2)}</b>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                      <td className="px-6 py-4 text-sm text-text-primary max-w-xs truncate">
                         {customer.address || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -295,8 +330,8 @@ const Customers = () => {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-                <div className="text-sm text-gray-700">
+              <div className="px-6 py-3 border-t border-theme-border flex items-center justify-between">
+                <div className="text-sm text-text-secondary">
                   Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
                   {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
                   {pagination.total} results
@@ -305,14 +340,14 @@ const Customers = () => {
                   <button
                     onClick={() => fetchCustomers(pagination.page - 1, searchTerm, typeFilter)}
                     disabled={pagination.page === 1}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-card-hover"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => fetchCustomers(pagination.page + 1, searchTerm, typeFilter)}
                     disabled={pagination.page === pagination.totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-card-hover"
                   >
                     Next
                   </button>
@@ -326,14 +361,14 @@ const Customers = () => {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-text-primary">
                 {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-text-secondary hover:text-text-secondary"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -341,7 +376,7 @@ const Customers = () => {
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Customer Name *
                 </label>
                 <input
@@ -354,7 +389,7 @@ const Customers = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Contact
                 </label>
                 <input
@@ -367,7 +402,7 @@ const Customers = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Type *
                   </label>
                   <select
@@ -382,7 +417,7 @@ const Customers = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Credit Limit
                   </label>
                   <input
@@ -398,7 +433,7 @@ const Customers = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Current Balance
                   </label>
                   <input
@@ -412,17 +447,17 @@ const Customers = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-text-secondary mb-1">
                     Available Credit
                   </label>
-                  <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700">
+                  <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-background text-text-secondary">
                     {(parseFloat(formData.credit_limit || 0) - parseFloat(formData.balance || 0)).toFixed(2)}
                   </div>
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-text-secondary mb-1">
                   Address
                 </label>
                 <textarea
@@ -437,7 +472,7 @@ const Customers = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-300 text-text-secondary rounded-lg hover:bg-card-hover transition-colors"
                 >
                   Cancel
                 </button>

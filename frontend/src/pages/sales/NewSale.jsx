@@ -242,13 +242,13 @@ const NewSale = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/sales')}
-          className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-text-secondary hover:text-text-primary hover:bg-card-hover rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">New Sale</h1>
-          <p className="text-gray-600">Create a new sales transaction</p>
+          <h1 className="text-2xl font-bold text-text-primary">New Sale</h1>
+          <p className="text-text-secondary">Create a new sales transaction</p>
         </div>
       </div>
 
@@ -257,14 +257,14 @@ const NewSale = () => {
           {/* Left Column - Sale Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Customer Selection */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-card rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
                 <User className="w-5 h-5 mr-2" />
                 Customer Information
               </h3>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Select Customer (Optional)
                 </label>
                 <div className="relative">
@@ -280,11 +280,11 @@ const NewSale = () => {
                     placeholder="Search customers by name, email, or phone..."
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
-                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-text-secondary" />
                 </div>
 
                 {showCustomerDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-card border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {filteredCustomers.length > 0 ? (
                       filteredCustomers.map((customer) => (
                         <div
@@ -294,17 +294,17 @@ const NewSale = () => {
                             setCustomerSearch('');
                             setShowCustomerDropdown(false);
                           }}
-                          className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          className="p-3 hover:bg-card-hover cursor-pointer border-b border-theme-border last:border-b-0"
                         >
-                          <div className="font-medium text-gray-900">{customer.name}</div>
-                          <div className="text-sm text-gray-600">{customer.email}</div>
+                          <div className="font-medium text-text-primary">{customer.name}</div>
+                          <div className="text-sm text-text-secondary">{customer.email}</div>
                           {customer.phone && (
-                            <div className="text-sm text-gray-600">{customer.phone}</div>
+                            <div className="text-sm text-text-secondary">{customer.phone}</div>
                           )}
                         </div>
                       ))
                     ) : (
-                      <div className="p-3 text-gray-500 text-center">No customers found</div>
+                      <div className="p-3 text-text-secondary text-center">No customers found</div>
                     )}
                   </div>
                 )}
@@ -330,8 +330,8 @@ const NewSale = () => {
             </div>
 
             {/* Product Selection */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-card rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
                 <Package className="w-5 h-5 mr-2" />
                 Add Products
               </h3>
@@ -348,34 +348,34 @@ const NewSale = () => {
                   placeholder="Search products by name, SKU, or batch number..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
-                <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                <Search className="absolute right-3 top-2.5 w-5 h-5 text-text-secondary" />
               </div>
 
               {showProductDropdown && productSearch && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div className="absolute z-10 w-full mt-1 bg-card border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {filteredStockEntries.length > 0 ? (
                     filteredStockEntries.map((entry) => (
                       <div
                         key={entry.id}
                         onClick={() => addItemToSale(entry)}
-                        className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        className="p-3 hover:bg-card-hover cursor-pointer border-b border-theme-border last:border-b-0"
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <div className="font-medium text-gray-900">{entry.product?.name}</div>
-                            <div className="text-sm text-gray-600">SKU: {entry.product?.sku}</div>
-                            <div className="text-sm text-gray-600">Batch: {entry.batch_number}</div>
-                            <div className="text-sm text-gray-600">Available: {entry.available_weight} kg</div>
+                            <div className="font-medium text-text-primary">{entry.product?.name}</div>
+                            <div className="text-sm text-text-secondary">SKU: {entry.product?.sku}</div>
+                            <div className="text-sm text-text-secondary">Batch: {entry.batch_number}</div>
+                            <div className="text-sm text-text-secondary">Available: {entry.available_weight} {entry.product?.unit || 'kg'}</div>
                           </div>
                           <div className="text-right">
-                            <div className="font-medium text-gray-900">${entry.unit_price}/kg</div>
-                            <div className="text-sm text-gray-600">{entry.warehouse?.name}</div>
+                            <div className="font-medium text-text-primary">${entry.unit_price}/{entry.product?.unit || 'kg'}</div>
+                            <div className="text-sm text-text-secondary">{entry.warehouse?.name}</div>
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="p-3 text-gray-500 text-center">No products found</div>
+                    <div className="p-3 text-text-secondary text-center">No products found</div>
                   )}
                 </div>
               )}
@@ -390,23 +390,23 @@ const NewSale = () => {
 
             {/* Selected Items */}
             {selectedItems.length > 0 && (
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="bg-card rounded-lg p-6 shadow-sm border">
+                <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   Sale Items ({itemCount})
                 </h3>
 
                 <div className="space-y-4">
                   {selectedItems.map((item, index) => (
-                    <div key={item.stock_entry_id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={item.stock_entry_id} className="border border-theme-border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{item.product?.name}</h4>
-                          <p className="text-sm text-gray-600">
+                          <h4 className="font-medium text-text-primary">{item.product?.name}</h4>
+                          <p className="text-sm text-text-secondary">
                             SKU: {item.product?.sku} | Batch: {item.batch_number}
                           </p>
-                          <p className="text-sm text-gray-600">
-                            Available: {item.available_weight} kg | Warehouse: {item.warehouse?.name}
+                          <p className="text-sm text-text-secondary">
+                            Available: {item.available_weight} {item.product?.unit || 'kg'} | Warehouse: {item.warehouse?.name}
                           </p>
                         </div>
                         <button
@@ -420,7 +420,7 @@ const NewSale = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             Quantity (kg)
                           </label>
                           <input
@@ -438,7 +438,7 @@ const NewSale = () => {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             Unit Price ($)
                           </label>
                           <input
@@ -455,10 +455,10 @@ const NewSale = () => {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             Total Amount
                           </label>
-                          <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg font-medium text-gray-900">
+                          <div className="px-3 py-2 bg-background border border-gray-300 rounded-lg font-medium text-text-primary">
                             ${item.total_amount.toFixed(2)}
                           </div>
                         </div>
@@ -473,24 +473,24 @@ const NewSale = () => {
           {/* Right Column - Summary & Actions */}
           <div className="space-y-6">
             {/* Sale Summary */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-card rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
                 <Calculator className="w-5 h-5 mr-2" />
                 Sale Summary
               </h3>
 
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Items:</span>
+                  <span className="text-text-secondary">Items:</span>
                   <span className="font-medium">{itemCount}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Total Weight:</span>
+                  <span className="text-text-secondary">Total Weight:</span>
                   <span className="font-medium">{totalWeight.toFixed(2)} kg</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between">
-                    <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
+                    <span className="text-lg font-semibold text-text-primary">Total Amount:</span>
                     <span className="text-xl font-bold text-green-600">${subtotal.toFixed(2)}</span>
                   </div>
                 </div>
@@ -498,15 +498,15 @@ const NewSale = () => {
             </div>
 
             {/* Sale Details */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-card rounded-lg p-6 shadow-sm border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center">
                 <FileText className="w-5 h-5 mr-2" />
                 Sale Details
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Sale Date
                   </label>
                   <input
@@ -521,7 +521,7 @@ const NewSale = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Notes (Optional)
                   </label>
                   <textarea
@@ -536,7 +536,7 @@ const NewSale = () => {
             </div>
 
             {/* Actions */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <div className="bg-card rounded-lg p-6 shadow-sm border">
               <div className="space-y-3">
                 <button
                   type="submit"
@@ -559,7 +559,7 @@ const NewSale = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/sales')}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full flex items-center justify-center px-4 py-3 bg-card-hover text-text-secondary rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   Cancel
                 </button>

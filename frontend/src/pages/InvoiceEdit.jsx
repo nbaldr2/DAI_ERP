@@ -18,6 +18,7 @@ const InvoiceEdit = () => {
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [productSearch, setProductSearch] = useState('');
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [invoiceLoading, setInvoiceLoading] = useState(true);
@@ -61,12 +62,26 @@ const InvoiceEdit = () => {
     }
   }, [id]);
 
+
+  // Debounced product search
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (productSearch) {
+        fetchProducts(productSearch);
+      } else {
+        fetchProducts();
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [productSearch]);
+
   const fetchInvoice = async (invoiceId) => {
     try {
       setInvoiceLoading(true);
       const response = await apiService.invoices.get(invoiceId);
       const invoice = response.data?.data;
-      
+
       // Map invoice data to form data
       const itemsSource = Array.isArray(invoice.items)
         ? invoice.items
@@ -88,40 +103,40 @@ const InvoiceEdit = () => {
         terms: invoice.terms || "",
         items: itemsSource.length > 0
           ? itemsSource.map(item => {
-              const product = item.product || {};
-              const bilingualName = product.name_ar
-                ? `${product.name_en || ''} - ${product.name_ar}`.trim()
-                : (product.name_en || product.name_ar || '');
-              const description = item.description || bilingualName || '';
-              const quantity = parseFloat(item.quantity) || 1;
-              const rate = parseFloat(item.rate ?? item.unit_price ?? 0) || 0;
-              const discount = parseFloat(item.discount) || 0;
-              const amount = parseFloat(
-                item.amount ?? item.total_price ?? (quantity * rate)
-              ) || 0;
-              return {
-                product_id: item.product_id ?? product.id ?? "",
-                description,
-                quantity,
-                rate,
-                discount,
-                amount,
-              };
-            })
+            const product = item.product || {};
+            const bilingualName = product.name_ar
+              ? `${product.name_en || ''} - ${product.name_ar}`.trim()
+              : (product.name_en || product.name_ar || '');
+            const description = item.description || bilingualName || '';
+            const quantity = parseFloat(item.quantity) || 1;
+            const rate = parseFloat(item.rate ?? item.unit_price ?? 0) || 0;
+            const discount = parseFloat(item.discount) || 0;
+            const amount = parseFloat(
+              item.amount ?? item.total_price ?? (quantity * rate)
+            ) || 0;
+            return {
+              product_id: item.product_id ?? product.id ?? "",
+              description,
+              quantity,
+              rate,
+              discount,
+              amount,
+            };
+          })
           : [
-              {
-                product_id: "",
-                description: "",
-                quantity: 1,
-                rate: 0,
-                discount: 0,
-                amount: 0,
-              },
-            ],
+            {
+              product_id: "",
+              description: "",
+              quantity: 1,
+              rate: 0,
+              discount: 0,
+              amount: 0,
+            },
+          ],
       };
-      
+
       setFormData(mappedData);
-      
+
       // Fetch customer details if customer_id exists
       if (invoice.customer_id) {
         try {
@@ -153,10 +168,14 @@ const InvoiceEdit = () => {
     }
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (searchTerm = '') => {
     try {
       setLoadingProducts(true);
-      const response = await apiService.products.list({ limit: 100 });
+      const params = { limit: 100 };
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      const response = await apiService.products.list(params);
       setProducts(response.data.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -195,7 +214,7 @@ const InvoiceEdit = () => {
 
   const handleItemChange = async (index, field, value) => {
     const updatedItems = [...formData.items];
-    
+
     // Ensure value is never undefined
     const safeValue = value === undefined ? '' : value;
     updatedItems[index][field] = safeValue;
@@ -224,16 +243,14 @@ const InvoiceEdit = () => {
       try {
         // Fetch the specific product to get the latest price
         const response = await apiService.products.get(safeValue);
-        const product = response.data;
-        
+        const product = response.data?.data || response.data;
+
         if (product) {
-          // Combine both English and Arabic names for the description
-          const description = product.name_ar 
-            ? `${product.name_en} - ${product.name_ar}` 
-            : product.name_en || '';
+          // Use product description if available
+          const description = product.description || '';
           updatedItems[index].description = description;
           updatedItems[index].rate = product.price_per_unit || 0;
-          
+
           // Recalculate amount with the new rate
           const quantity = parseFloat(updatedItems[index].quantity) || 0;
           const rate = parseFloat(product.price_per_unit) || 0;
@@ -245,19 +262,19 @@ const InvoiceEdit = () => {
       } catch (error) {
         console.error("Error fetching product details:", error);
         toast.error("Failed to fetch product details");
-        
+
         // Fallback to cached product data
         const product = products.find(
           (p) => p.id.toString() === safeValue.toString(),
         );
         if (product) {
-          // Combine both English and Arabic names for the description
-          const description = product.name_ar 
-            ? `${product.name_en} - ${product.name_ar}` 
-            : product.name_en || '';
+          // Use product description if available, otherwise fallback to bilingual name
+          const description = product.description || (product.name_ar
+            ? `${product.name_en} - ${product.name_ar}`
+            : product.name_en || '');
           updatedItems[index].description = description;
           updatedItems[index].rate = product.price_per_unit || 0;
-          
+
           // Recalculate amount with the new rate
           const quantity = parseFloat(updatedItems[index].quantity) || 0;
           const rate = parseFloat(product.price_per_unit) || 0;
@@ -269,10 +286,10 @@ const InvoiceEdit = () => {
       }
     }
 
-    setFormData({
-      ...formData,
+    setFormData(prevFormData => ({
+      ...prevFormData,
       items: updatedItems,
-    });
+    }));
   };
 
   const addItem = () => {
@@ -297,7 +314,7 @@ const InvoiceEdit = () => {
       toast.error(t('invoices.items.min_required', 'At least one item is required'));
       return;
     }
-    
+
     const updatedItems = [...formData.items];
     updatedItems.splice(index, 1);
     setFormData({
@@ -325,21 +342,21 @@ const InvoiceEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.customer_id) {
       toast.error(t('invoices.validation.customer_required', 'Please select a customer'));
       return;
     }
-    
+
     if (formData.items.some(item => !item.description || parseFloat(item.quantity) <= 0 || parseFloat(item.rate) <= 0)) {
       toast.error(t('invoices.validation.items_required', 'Please fill in all item details'));
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // Prepare data for submission
       const submitData = {
         customer_id: formData.customer_id,
@@ -366,7 +383,7 @@ const InvoiceEdit = () => {
           amount: parseFloat(item.amount) || 0,
         })),
       };
-      
+
       const response = await apiService.invoices.update(id, submitData);
       toast.success(t('invoices.edit.success', 'Invoice updated successfully'));
       navigate("/invoices");
@@ -399,10 +416,10 @@ const InvoiceEdit = () => {
           {t('common.back', 'Back')}
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             {t('invoices.edit.title', 'Edit Invoice')}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-text-secondary mt-1">
             {t('invoices.edit.subtitle', 'Modify invoice details')}
           </p>
         </div>
@@ -415,7 +432,7 @@ const InvoiceEdit = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Customer Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   {t('invoices.fields.customer', 'Customer')} *
                 </label>
                 {loadingCustomers ? (
@@ -441,10 +458,10 @@ const InvoiceEdit = () => {
               {/* Customer Details */}
               {selectedCustomer && (
                 <Card className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">
+                  <h3 className="font-medium text-text-primary mb-2">
                     {t('invoices.customer_details', 'Customer Details')}
                   </h3>
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-sm text-text-secondary space-y-1">
                     <p>{selectedCustomer.name}</p>
                     {selectedCustomer.contact && <p>{selectedCustomer.contact}</p>}
                     {selectedCustomer.address && (
@@ -457,7 +474,7 @@ const InvoiceEdit = () => {
               {/* Invoice Dates */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('invoices.fields.invoice_date', 'Invoice Date')} *
                   </label>
                   <input
@@ -470,7 +487,7 @@ const InvoiceEdit = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('invoices.fields.due_date', 'Due Date')} *
                   </label>
                   <input
@@ -487,7 +504,7 @@ const InvoiceEdit = () => {
               {/* Payment Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('invoices.fields.payment_mode', 'Payment Mode')}
                   </label>
                   <select
@@ -504,7 +521,7 @@ const InvoiceEdit = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     {t('invoices.fields.sale_agent', 'Sale Agent')}
                   </label>
                   <input
@@ -520,7 +537,7 @@ const InvoiceEdit = () => {
               {/* Items Section */}
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-text-primary">
                     {t('invoices.items.title', 'Items')}
                   </h3>
                   <Button
@@ -538,25 +555,41 @@ const InvoiceEdit = () => {
                     <Card key={index} className="p-4">
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                         <div className="md:col-span-5">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             {t('invoices.items.description', 'Description')} *
                           </label>
-                          {loadingProducts ? (
-                            <div className="animate-pulse bg-gray-200 h-8 rounded"></div>
-                          ) : (
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={productSearch}
+                              onChange={(e) => setProductSearch(e.target.value)}
+                              placeholder="Search products..."
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
+                            />
                             <select
                               value={item.product_id}
-                              onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
+                              onChange={async (e) => {
+                                await handleItemChange(index, 'product_id', e.target.value);
+                                setProductSearch(''); // Clear search after selection
+                              }}
                               className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             >
                               <option value="">{t('common.select', 'Select product')}...</option>
                               {products.map((product) => (
                                 <option key={product.id} value={product.id}>
-                                  {product.name_en} {product.name_ar ? ` - ${product.name_ar}` : ''}
+                                  {product.name_en} {product.name_ar ? ` - ${product.name_ar}` : ''} (QAR {product.price_per_unit})
                                 </option>
                               ))}
                             </select>
-                          )}
+                            {loadingProducts && (
+                              <div className="absolute inset-0 bg-card bg-opacity-70 flex items-center justify-center rounded">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                              </div>
+                            )}
+
+
+
+                          </div>
                           <textarea
                             value={item.description}
                             onChange={(e) => handleItemChange(index, 'description', e.target.value)}
@@ -566,7 +599,7 @@ const InvoiceEdit = () => {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             {t('invoices.items.quantity', 'Qty')} *
                           </label>
                           <input
@@ -579,7 +612,7 @@ const InvoiceEdit = () => {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             {t('invoices.items.rate', 'Rate')} (QAR) *
                           </label>
                           <input
@@ -592,7 +625,7 @@ const InvoiceEdit = () => {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-text-secondary mb-1">
                             {t('invoices.items.discount', 'Discount')} (%)
                           </label>
                           <input
@@ -617,7 +650,7 @@ const InvoiceEdit = () => {
                           </Button>
                         </div>
                       </div>
-                      <div className="mt-2 text-right text-sm font-medium text-gray-900">
+                      <div className="mt-2 text-right text-sm font-medium text-text-primary">
                         {t('invoices.items.amount', 'Amount')}: QAR {parseFloat(item.amount || 0).toFixed(2)}
                       </div>
                     </Card>
@@ -630,19 +663,19 @@ const InvoiceEdit = () => {
             <div className="space-y-6">
               {/* Invoice Summary */}
               <Card className="p-4">
-                <h3 className="font-medium text-gray-900 mb-4">
+                <h3 className="font-medium text-text-primary mb-4">
                   {t('invoices.summary.title', 'Invoice Summary')}
                 </h3>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">{t('invoices.summary.subtotal', 'Subtotal')}</span>
+                    <span className="text-text-secondary">{t('invoices.summary.subtotal', 'Subtotal')}</span>
                     <span>QAR {calculateSubtotal().toFixed(2)}</span>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-gray-600">{t('invoices.summary.discount', 'Discount')}</span>
+                      <span className="text-text-secondary">{t('invoices.summary.discount', 'Discount')}</span>
                       <span>
                         <select
                           name="discount_type"
@@ -687,8 +720,8 @@ const InvoiceEdit = () => {
                       </div>
                     )}
                   </div>
-                  
-                  <div className="flex justify-between pt-2 border-t border-gray-200">
+
+                  <div className="flex justify-between pt-2 border-t border-theme-border">
                     <span className="font-medium">{t('invoices.summary.total', 'Total')}</span>
                     <span className="font-bold">QAR {calculateTotal().toFixed(2)}</span>
                   </div>
@@ -697,13 +730,13 @@ const InvoiceEdit = () => {
 
               {/* Notes */}
               <Card className="p-4">
-                <h3 className="font-medium text-gray-900 mb-3">
+                <h3 className="font-medium text-text-primary mb-3">
                   {t('invoices.notes.title', 'Notes')}
                 </h3>
-                
+
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">
+                    <label className="block text-sm text-text-secondary mb-1">
                       {t('invoices.notes.admin', 'Admin Notes')}
                     </label>
                     <textarea
@@ -715,9 +748,9 @@ const InvoiceEdit = () => {
                       rows="3"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">
+                    <label className="block text-sm text-text-secondary mb-1">
                       {t('invoices.notes.client', 'Client Notes')}
                     </label>
                     <textarea
@@ -729,9 +762,9 @@ const InvoiceEdit = () => {
                       rows="3"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm text-gray-700 mb-1">
+                    <label className="block text-sm text-text-secondary mb-1">
                       {t('invoices.notes.terms', 'Terms & Conditions')}
                     </label>
                     <textarea
@@ -770,7 +803,7 @@ const InvoiceEdit = () => {
           </div>
         </Card>
       </form>
-    </div>
+    </div >
   );
 };
 

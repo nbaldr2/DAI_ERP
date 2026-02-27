@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, param } = require('express-validator');
 const { authenticateToken, authorize } = require('../middlewares/auth');
+const { cacheMiddleware, incrementVersion } = require('../middlewares/cache');
 const { Product } = require('../models');
 const { Op } = require('sequelize');
 
@@ -12,6 +13,7 @@ const { Op } = require('sequelize');
  */
 router.get('/',
   authenticateToken,
+  cacheMiddleware('products', 300), // Versioned Cache for 5 minutes
   async (req, res) => {
     try {
       const { search, category, page = 1, limit = 50 } = req.query;
@@ -74,11 +76,15 @@ router.post('/',
     body('unit').optional().isString(),
     body('min_qty').optional().isFloat({ min: 0 }),
     body('expiry_alert_days').optional().isInt({ min: 0 }),
+    body('description').optional().isString(),
     body('price_per_unit').isFloat({ min: 0 }).withMessage('Price per unit must be non-negative')
   ],
   async (req, res) => {
     try {
       const product = await Product.create(req.body);
+
+      // Invalidate cache by incrementing version
+      await incrementVersion('products');
 
       res.status(201).json({
         success: true,
@@ -103,6 +109,7 @@ router.post('/',
  */
 router.get('/:id',
   authenticateToken,
+  cacheMiddleware('products', 300),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -147,6 +154,7 @@ router.put('/:id',
     body('unit').optional().isString(),
     body('min_qty').optional().isFloat({ min: 0 }),
     body('expiry_alert_days').optional().isInt({ min: 0 }),
+    body('description').optional().isString(),
     body('price_per_unit').optional().isFloat({ min: 0 })
   ],
   async (req, res) => {
@@ -162,6 +170,9 @@ router.put('/:id',
       }
 
       await product.update(req.body);
+
+      // Invalidate cache
+      await incrementVersion('products');
 
       res.status(200).json({
         success: true,
@@ -200,6 +211,9 @@ router.delete('/:id',
       }
 
       await product.destroy();
+
+      // Invalidate cache
+      await incrementVersion('products');
 
       res.status(200).json({
         success: true,

@@ -101,11 +101,11 @@ export default function Users() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
             <Shield className="w-6 h-6 text-primary-600" />
             Users
           </h1>
-          <p className="text-gray-600 mt-1">Manage users and roles</p>
+          <p className="text-text-secondary mt-1">Manage users and roles</p>
         </div>
         <button
           onClick={openAddForm}
@@ -116,11 +116,11 @@ export default function Users() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-card rounded-lg shadow-sm border p-4">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
               <input
                 type="text"
                 placeholder="Search users..."
@@ -134,28 +134,28 @@ export default function Users() {
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-card rounded-lg shadow-sm border overflow-hidden">
+        <table className="min-w-full divide-y divide-theme-border">
+          <thead className="bg-background">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Username</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Role</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-card divide-y divide-theme-border">
             {users.map((u) => (
-              <tr key={u.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.username}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.name}</td>
+              <tr key={u.id} className="hover:bg-card-hover">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">{u.username}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">{u.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">{u.role}</span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => openEditForm(u)}
-                    className="inline-flex items-center px-3 py-2 text-gray-700 hover:text-primary-700"
+                    className="inline-flex items-center px-3 py-2 text-text-secondary hover:text-primary-700"
                   >
                     <Edit className="w-4 h-4 mr-1" /> Edit
                   </button>
@@ -176,11 +176,11 @@ export default function Users() {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+          <div className="bg-card rounded-lg shadow-lg w-full max-w-lg p-6">
             <h2 className="text-xl font-semibold mb-4">{editingUser ? 'Edit User' : 'Add User'}</h2>
             <form onSubmit={submitForm} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Username</label>
                 <input
                   type="text"
                   value={formData.username}
@@ -190,7 +190,7 @@ export default function Users() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Name</label>
                 <input
                   type="text"
                   value={formData.name}
@@ -200,7 +200,7 @@ export default function Users() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-text-secondary mb-1">Role</label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
@@ -212,7 +212,7 @@ export default function Users() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{editingUser ? 'New Password (optional)' : 'Password'}</label>
+                <label className="block text-sm font-medium text-text-secondary mb-1">{editingUser ? 'New Password (optional)' : 'Password'}</label>
                 <input
                   type="password"
                   value={formData.password}
