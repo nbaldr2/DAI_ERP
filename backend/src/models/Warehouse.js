@@ -28,7 +28,9 @@ const Warehouse = sequelize.define('Warehouse', {
   }
 }, {
   tableName: 'warehouses',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false,
   paranoid: true,
   deletedAt: 'deleted_at'
 });

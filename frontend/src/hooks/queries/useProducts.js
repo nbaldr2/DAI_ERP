@@ -62,3 +62,26 @@ export const useProduct = (id) => {
         enabled: !!id,
     });
 };
+
+export const usePriceList = () => {
+    return useQuery({
+        queryKey: ['priceList'],
+        queryFn: () => apiService.products.priceList().then((res) => res.data),
+    });
+};
+
+export const useBulkUpdateProducts = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data) => apiService.products.bulkUpdate(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['products']);
+            queryClient.invalidateQueries(['priceList']);
+            toast.success('Prices updated successfully');
+        },
+        onError: (error) => {
+            toast.error(error.message || 'Failed to update prices');
+        },
+    });
+};

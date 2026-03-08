@@ -885,6 +885,70 @@ class StockService {
     }
   }
 
+  /**
+   * Delete a waste/damage record and restore stock
+   */
+  async deleteWaste(id, userId, ipAddress = null, userAgent = null) {
+    const transaction = await sequelize.transaction();
+    try {
+      const wasteRecord = await WasteDamage.findByPk(id, { transaction });
+      if (!wasteRecord) throw new Error('Waste record not found');
+
+      const { stock_entry_id, waste_weight } = wasteRecord;
+
+      // Find the corresponding StockBatch
+      const stockBatch = await StockBatch.findByPk(stock_entry_id, {
+        lock: transaction.LOCK.UPDATE,
+        transaction
+      });
+
+      if (stockBatch) {
+        // Restore quantity back to the batch
+        stockBatch.current_quantity = parseFloat(stockBatch.current_quantity) + parseFloat(waste_weight);
+        if (stockBatch.status === 'DEPLETED' && stockBatch.current_quantity > 0.01) {
+          stockBatch.status = 'ACTIVE';
+        }
+        await stockBatch.save({ transaction });
+
+        // Remove the related StockMovement that was created for this waste
+        await StockMovement.destroy({
+          where: { reference_type: 'waste_damage', reference_id: id },
+          transaction
+        });
+
+        // Restore ProductStock aggregation
+        await this.updateProductStock(
+          stockBatch.product_id,
+          stockBatch.warehouse_id,
+          parseFloat(waste_weight),
+          'IN',
+          transaction
+        );
+      }
+
+      // Delete the waste record
+      await wasteRecord.destroy({ transaction });
+
+      await AuditLog.logChange({
+        entity_type: 'waste_damage',
+        entity_id: id,
+        action: 'DELETE',
+        old_value: wasteRecord.toJSON(),
+        new_value: null,
+        performed_by: userId,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        notes: 'Waste record deleted and stock restored'
+      }, transaction);
+
+      await transaction.commit();
+      return { message: 'Waste record deleted and stock restored successfully' };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
 }
 
 module.exports = new StockService();

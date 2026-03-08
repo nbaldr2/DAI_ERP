@@ -288,39 +288,64 @@ router.get('/waste-analysis', authenticateToken, async (req, res) => {
  */
 router.get('/inventory-valuation', authenticateToken, async (req, res) => {
   try {
-    const { StockEntry, Product, InventoryLedger } = require('../models');
-    const { Op } = require('sequelize');
+    const { ProductStock, Product, Warehouse } = require('../models');
+    const { warehouse_id } = req.query;
 
-    const stocks = await StockEntry.findAll({
-      where: {
-        status: { [Op.in]: ['RECEIVED', 'INSPECTED'] }
-      },
-      include: [{ model: Product, as: 'product' }]
+    const where = {};
+    if (warehouse_id) where.warehouse_id = parseInt(warehouse_id);
+
+    const productStocks = await ProductStock.findAll({
+      where,
+      include: [
+        { model: Product, as: 'product' },
+        { model: Warehouse, as: 'warehouse' }
+      ]
     });
 
     const valuation = {
-      total_items: stocks.length,
+      total_items: productStocks.length,
       total_value: 0,
+      by_warehouse: {},
       items: []
     };
 
-    for (const stock of stocks) {
-      const balance = await InventoryLedger.getLatestBalance(stock.id);
-      const itemValue = balance * parseFloat(stock.product.price_per_unit || 0);
+    for (const ps of productStocks) {
+      const availableQty = parseFloat(ps.quantity_on_hand || 0);
+      const unitPrice = parseFloat(ps.product?.price_per_unit || 0);
+      const itemValue = availableQty * unitPrice;
 
       valuation.total_value += itemValue;
+
       valuation.items.push({
-        stock_entry_id: stock.id,
-        product_name_en: stock.product.name_en,
-        product_name_ar: stock.product.name_ar,
-        available_qty: balance,
-        unit_price: parseFloat(stock.product.price_per_unit || 0),
-        total_value: itemValue,
-        expiry_date: stock.expiry_date
+        product_id: ps.product_id,
+        warehouse_id: ps.warehouse_id,
+        product_name_en: ps.product?.name_en || 'Unknown',
+        product_name_ar: ps.product?.name_ar || '',
+        category: ps.product?.category || '-',
+        warehouse_name: ps.warehouse?.name || 'Unknown',
+        available_qty: availableQty,
+        reserved_qty: parseFloat(ps.reserved_quantity || 0),
+        unit_price: unitPrice,
+        total_value: itemValue
       });
+
+      // Group by warehouse
+      const whKey = ps.warehouse_id;
+      if (!valuation.by_warehouse[whKey]) {
+        valuation.by_warehouse[whKey] = {
+          warehouse_id: ps.warehouse_id,
+          warehouse_name: ps.warehouse?.name || 'Unknown',
+          total_value: 0,
+          items_count: 0
+        };
+      }
+      valuation.by_warehouse[whKey].total_value += itemValue;
+      valuation.by_warehouse[whKey].items_count++;
     }
 
     valuation.items.sort((a, b) => b.total_value - a.total_value);
+    valuation.by_warehouse = Object.values(valuation.by_warehouse)
+      .sort((a, b) => b.total_value - a.total_value);
 
     res.json({ success: true, data: valuation });
   } catch (error) {
@@ -358,8 +383,8 @@ router.get('/invoice-revenue', authenticateToken, async (req, res) => {
     const invoices = await Invoice.findAll({
       where,
       include: [
-        { 
-          model: Customer, 
+        {
+          model: Customer,
           as: 'customer',
           attributes: ['id', 'name', 'contact', 'address']
         },

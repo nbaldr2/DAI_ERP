@@ -25,7 +25,8 @@ import {
   DollarSign,
   ScrollText,
   Store,
-  FolderOpen
+  FolderOpen,
+  Tag
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -72,6 +73,12 @@ const Sidebar = () => {
     },
     {
       type: 'divider'
+    },
+    {
+      label: 'Price List',
+      icon: Tag,
+      path: '/price-list',
+      permission: null
     },
     {
       label: t('nav.products'),

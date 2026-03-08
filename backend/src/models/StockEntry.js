@@ -123,7 +123,9 @@ const StockEntry = sequelize.define('StockEntry', {
   }
 }, {
   tableName: 'stock_entries',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   paranoid: true,
   deletedAt: 'deleted_at',
   hooks: {
@@ -143,7 +145,7 @@ const StockEntry = sequelize.define('StockEntry', {
 });
 
 // Instance method to check if near expiry
-StockEntry.prototype.isNearExpiry = function(days = 7) {
+StockEntry.prototype.isNearExpiry = function (days = 7) {
   const expiryDate = new Date(this.expiry_date);
   const today = new Date();
   const diffTime = expiryDate - today;
@@ -152,7 +154,7 @@ StockEntry.prototype.isNearExpiry = function(days = 7) {
 };
 
 // Instance method to check if expired
-StockEntry.prototype.isExpired = function() {
+StockEntry.prototype.isExpired = function () {
   const expiryDate = new Date(this.expiry_date);
   const today = new Date();
   return expiryDate < today;

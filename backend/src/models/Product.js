@@ -59,6 +59,14 @@ const Product = sequelize.define('Product', {
       min: 0
     }
   },
+  wholesale_price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    validate: {
+      min: 0
+    }
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
@@ -73,7 +81,9 @@ const Product = sequelize.define('Product', {
   }
 }, {
   tableName: 'products',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   paranoid: true,
   deletedAt: 'deleted_at'
 });

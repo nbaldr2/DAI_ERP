@@ -25,6 +25,7 @@ import StockLedger from './pages/StockLedger';
 import StockDetails from './pages/StockDetails';
 import WasteManagement from './pages/WasteManagement';
 import SalesManagement from './pages/SalesManagement';
+import PriceList from './pages/PriceList';
 import Products from './pages/Products';
 import Suppliers from './pages/Suppliers';
 import Customers from './pages/Customers';
@@ -138,6 +139,7 @@ function App() {
                         <Route path="sales" element={<SalesManagement />} />
 
                         {/* Master Data */}
+                        <Route path="price-list" element={<PriceList />} />
                         <Route path="products" element={<Products />} />
                         <Route path="suppliers" element={<Suppliers />} />
                         <Route path="customers" element={<Customers />} />

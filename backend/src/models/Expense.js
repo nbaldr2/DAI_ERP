@@ -84,7 +84,9 @@ const Expense = sequelize.define('Expense', {
   }
 }, {
   tableName: 'expenses',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   paranoid: true,
   deletedAt: 'deleted_at'
 });

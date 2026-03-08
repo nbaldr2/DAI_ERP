@@ -51,7 +51,9 @@ const Supplier = sequelize.define('Supplier', {
   }
 }, {
   tableName: 'suppliers',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
   paranoid: true,
   deletedAt: 'deleted_at'
 });

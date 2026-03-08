@@ -77,7 +77,8 @@ router.post('/',
     body('min_qty').optional().isFloat({ min: 0 }),
     body('expiry_alert_days').optional().isInt({ min: 0 }),
     body('description').optional().isString(),
-    body('price_per_unit').isFloat({ min: 0 }).withMessage('Price per unit must be non-negative')
+    body('price_per_unit').isFloat({ min: 0 }).withMessage('Price per unit must be non-negative'),
+    body('wholesale_price').optional().isFloat({ min: 0 }).withMessage('Wholesale price must be non-negative')
   ],
   async (req, res) => {
     try {
@@ -96,6 +97,90 @@ router.post('/',
       res.status(500).json({
         success: false,
         message: 'Failed to create product',
+        error: error.message
+      });
+    }
+  }
+);
+
+/**
+ * @route   GET /api/products/price-list
+ * @desc    Get all products for the price list (no pagination)
+ * @access  Private
+ */
+router.get('/price-list',
+  authenticateToken,
+  cacheMiddleware('products_price_list', 300),
+  async (req, res) => {
+    try {
+      const products = await Product.findAll({
+        order: [['name_en', 'ASC']]
+      });
+
+      res.status(200).json({
+        success: true,
+        data: products
+      });
+    } catch (error) {
+      console.error('Price list error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch price list',
+        error: error.message
+      });
+    }
+  }
+);
+
+/**
+ * @route   PUT /api/products/bulk-price-update
+ * @desc    Bulk update product prices
+ * @access  Private (Admin, Warehouse)
+ */
+router.put('/bulk-price-update',
+  authenticateToken,
+  authorize('ADMIN', 'WAREHOUSE'),
+  [
+    body('updates').isArray().withMessage('Updates must be an array'),
+    body('updates.*.id').isInt().withMessage('Product ID is required for each update'),
+    body('updates.*.price_per_unit').optional().isFloat({ min: 0 }),
+    body('updates.*.wholesale_price').optional().isFloat({ min: 0 })
+  ],
+  async (req, res) => {
+    try {
+      const { updates } = req.body;
+
+      // Update in a transaction
+      await Product.sequelize.transaction(async (t) => {
+        for (const update of updates) {
+          const { id, price_per_unit, wholesale_price } = update;
+          // Build update payload dynamically depending on what's provided
+          const payload = {};
+          if (price_per_unit !== undefined) payload.price_per_unit = price_per_unit;
+          if (wholesale_price !== undefined) payload.wholesale_price = wholesale_price;
+
+          if (Object.keys(payload).length > 0) {
+            await Product.update(payload, {
+              where: { id },
+              transaction: t
+            });
+          }
+        }
+      });
+
+      // Invalidate caches
+      await incrementVersion('products');
+      await incrementVersion('products_price_list');
+
+      res.status(200).json({
+        success: true,
+        message: 'Prices updated successfully'
+      });
+    } catch (error) {
+      console.error('Bulk price update error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update prices',
         error: error.message
       });
     }
@@ -155,7 +240,8 @@ router.put('/:id',
     body('min_qty').optional().isFloat({ min: 0 }),
     body('expiry_alert_days').optional().isInt({ min: 0 }),
     body('description').optional().isString(),
-    body('price_per_unit').optional().isFloat({ min: 0 })
+    body('price_per_unit').optional().isFloat({ min: 0 }),
+    body('wholesale_price').optional().isFloat({ min: 0 })
   ],
   async (req, res) => {
     try {
